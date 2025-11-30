@@ -73,7 +73,7 @@ const styles = {
     flexDirection: "column",
     alignItems: "flex-end",
     justifyContent: "center",
-    textAlign: "right",
+    textAlign: "center",
     paddingLeft: "16px",
     borderLeft: "1px solid rgba(255,255,255,0.18)",
   },
