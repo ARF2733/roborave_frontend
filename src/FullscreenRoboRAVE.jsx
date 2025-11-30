@@ -10,7 +10,8 @@ export default function FullscreenRoboRAVE({ children }) {
           />
 
           <div style={styles.headerRight}>
-            <span style={styles.taglineBottom}>MEXICO 2025 · LIVE SCORE</span>
+            <span style={styles.taglineTop}>MEXICO 2025</span>
+            <span style={styles.taglineBottom}>LIVE SCORE</span>
           </div>
         </div>
       </header>
