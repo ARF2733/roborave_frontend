@@ -62,7 +62,7 @@ const styles = {
   },
 
   logo: {
-    height: "35px",
+    height: "50px",
     objectFit: "contain",
     filter:
       "drop-shadow(0 0 6px rgba(208, 148, 148, 0.25)) drop-shadow(0 0 12px rgba(255,255,255,0.18))",
