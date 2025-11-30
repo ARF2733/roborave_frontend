@@ -63,8 +63,8 @@ const styles = {
   },
 
   logo: {
-    width: "64px",
-    height: "64px",
+    width: "82px",
+    height: "82px",
     borderRadius: "6px",
     objectFit: "contain",
     flexShrink: 0,
