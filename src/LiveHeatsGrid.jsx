@@ -1,8 +1,16 @@
+// LiveHeatsGrid.jsx
 export default function LiveHeatsGrid({ teams }) {
   return (
     <div style={styles.grid}>
-      {teams.map((t) => (
+      {teams.map((t, index) => (
         <div key={t.id} style={styles.card}>
+
+          {/* MEDALLAS TOP 3 (sin glow) */}
+          {index < 3 && (
+            <span style={styles.medal}>
+              {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
+            </span>
+          )}
 
           {/* LOGO */}
           <img
@@ -25,10 +33,8 @@ export default function LiveHeatsGrid({ teams }) {
             </div>
           </div>
 
-          {/* SCORE — ¡Aquí vuelve el número! */}
-          <div style={styles.score}>
-            {t.score}
-          </div>
+          {/* SCORE */}
+          <div style={styles.score}>{t.score}</div>
 
         </div>
       ))}
@@ -45,6 +51,7 @@ const styles = {
   },
 
   card: {
+    position: "relative",
     background: "rgba(255, 255, 255, 0.18)",
     borderRadius: "12px",
     padding: "14px 16px",
@@ -60,6 +67,14 @@ const styles = {
 
     boxShadow: "0 3px 10px rgba(0,0,0,0.35)",
     transition: "transform 0.15s ease",
+  },
+
+  medal: {
+    position: "absolute",
+    top: "-12px",
+    left: "-12px",
+    fontSize: "28px",
+    animation: "medalPop 0.35s ease-out",
   },
 
   logo: {
@@ -81,9 +96,7 @@ const styles = {
     fontSize: "15px",
     fontWeight: 600,
     color: "white",
-    whiteSpace: "normal",
     lineHeight: 1.25,
-
     display: "-webkit-box",
     WebkitLineClamp: 2,
     WebkitBoxOrient: "vertical",
@@ -122,3 +135,13 @@ const styles = {
     flexShrink: 0,
   },
 };
+
+/* ------------------------------------------- */
+/* -------- ANIMACIÓN GLOBAL (CSS) ----------- */
+/* ------------------------------------------- */
+/*
+  @keyframes medalPop {
+    0% { transform: scale(0.4); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+*/

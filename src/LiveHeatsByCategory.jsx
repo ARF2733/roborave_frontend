@@ -8,29 +8,36 @@ export default function LiveHeatsByCategory({ teams }) {
     return acc;
   }, {});
 
-  // Orden oficial
+  // Orden oficial por categoría
   const orderedEntries = Object.entries(grouped).sort(([a], [b]) =>
     sortCategories(a, b)
   );
 
   return (
     <div style={styles.wrapper}>
-      {orderedEntries.map(([category, list]) => (
-        <div key={category} style={styles.section}>
-          
-          {/* Título premium */}
-          <div style={styles.titleRow}>
-            <h2 style={styles.title}>{formatCategory(category)}</h2>
-            <span style={styles.count}>{list.length} teams</span>
+      {orderedEntries.map(([category, list]) => {
+
+        // ⭐ ORDENAR POR PUNTAJE (mayor → menor)
+        const sortedList = [...list].sort((a, b) => b.score - a.score);
+        // si es "points" o "total", solo cambia score por el nombre correcto
+
+        return (
+          <div key={category} style={styles.section}>
+            
+            {/* Título */}
+            <div style={styles.titleRow}>
+              <h2 style={styles.title}>{formatCategory(category)}</h2>
+              <span style={styles.count}>{sortedList.length} teams</span>
+            </div>
+
+            {/* Línea separadora */}
+            <div style={styles.divider} />
+
+            {/* Grid con medallas */}
+            <LiveHeatsGrid teams={sortedList} />
           </div>
-
-          {/* Línea separadora */}
-          <div style={styles.divider} />
-
-          {/* Grid */}
-          <LiveHeatsGrid teams={list} />
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -77,7 +84,8 @@ const styles = {
   divider: {
     width: "100%",
     height: "1px",
-    background: "linear-gradient(to right, rgba(255,255,255,0.15), rgba(255,255,255,0))",
+    background:
+      "linear-gradient(to right, rgba(255,255,255,0.15), rgba(255,255,255,0))",
   },
 };
 
@@ -97,7 +105,7 @@ const CATEGORY_ORDER = [
   "Line Following",
 ];
 
-// Para ordenar usando los nombres finales
+// Orden por categoría usando nombres formateados
 function sortCategories(a, b) {
   const cleanA = formatCategory(a).split("•")[0].trim();
   const cleanB = formatCategory(b).split("•")[0].trim();
@@ -132,6 +140,7 @@ function formatCategory(cat) {
     "SUMO3K_UP": "SumoBot 3 Kg • UP",
 
     // Soccer Futbol
+    "SOCCER_ES": "Soccer Futbol • ES",
     "SOCCER_MS": "Soccer Futbol • MS",
     "SOCCER_HS": "Soccer Futbol • HS",
 
@@ -142,6 +151,9 @@ function formatCategory(cat) {
 
     // Line Following
     "LINE_HS": "Line Following • HS",
+
+    // Entrepreneurial
+    "ENTRE_HS": "Entrepreneurial • HS",
   };
 
   return map[cat] || cat;
