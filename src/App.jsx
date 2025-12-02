@@ -7,6 +7,7 @@ import Judge from "./Judge";
 import JudgeDashboard from "./JudgeDashboard";
 import Sponsor from "./Sponsor";
 import { fallbackTeams } from "./fallbackTeams";
+import LiveScoresContainer from "./LiveScoresContainer"; // ⭐ NUEVO
 
 export default function App() {
   return (
@@ -20,12 +21,12 @@ export default function App() {
           element={<Home />} 
         />
 
-        {/* SCORES (participantes) */}
+        {/* SCORES (participantes EN VIVO) */}
         <Route
           path="/scores"
           element={
             <FullscreenRoboRAVE>
-              <LiveHeatsByCategory teams={fallbackTeams} />
+              <LiveScoresContainer /> {/* ⭐ AQUÍ SE ARREGLA EL LIVE */}
             </FullscreenRoboRAVE>
           }
         />
@@ -37,7 +38,6 @@ export default function App() {
         />
 
         <Route path="/judge/dashboard" element={<JudgeDashboard />} />
-
 
         {/* SPONSORS */}
         <Route 
