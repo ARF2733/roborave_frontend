@@ -2,17 +2,33 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Judge() {
-  const nav = useNavigate();
+  const navigate = useNavigate();
   const [pin, setPin] = useState("");
 
-  const CORRECT_PIN = "2025"; // lo cambias luego
-
-  const submit = () => {
-    if (pin === CORRECT_PIN) {
-      nav("/judge/dashboard");
-    } else {
-      alert("PIN incorrecto");
+  const loginJudge = async () => {
+    if (!pin) {
+      alert("Ingresa el PIN");
+      return;
     }
+
+    const r = await fetch("https://roborave.onrender.com/api/judge/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin }),
+    });
+
+    const json = await r.json();
+
+    if (!json.ok) {
+      alert("PIN incorrecto");
+      return;
+    }
+
+    // Guardar token válido
+    localStorage.setItem("judgeToken", json.token);
+
+    // Ir al dashboard del juez
+    navigate("/judge/dashboard");
   };
 
   return (
@@ -22,7 +38,7 @@ export default function Judge() {
       <input
         type="password"
         value={pin}
-        onChange={(e) => setPin(e.target.value)}
+        onChange={e => setPin(e.target.value)}
         placeholder="Ingresa tu PIN"
         style={{
           padding: 12,
@@ -34,7 +50,7 @@ export default function Judge() {
       />
 
       <button
-        onClick={submit}
+        onClick={loginJudge}
         style={{
           marginTop: 20,
           padding: 15,

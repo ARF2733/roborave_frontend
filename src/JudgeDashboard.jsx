@@ -1,33 +1,64 @@
-import { useState } from "react";
-import { fallbackTeams } from "./fallbackTeams"; // importa tu archivo
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { fallbackTeams } from "./fallbackTeams";
 
 export default function JudgeDashboard() {
+  const navigate = useNavigate();
+
+  const [teams, setTeams] = useState(fallbackTeams);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [score, setScore] = useState("");
 
+  // -------------------------------------------
+  //  BLOQUEO SI NO HAY TOKEN
+  // -------------------------------------------
+  useEffect(() => {
+    const token = localStorage.getItem("judgeToken");
+    if (!token) {
+      alert("No autorizado");
+      navigate("/judge");
+    }
+  }, []);
+
+  // -------------------------------------------
+  // SELECCIONAR EQUIPO
+  // -------------------------------------------
   const openModal = (team) => {
     setSelectedTeam(team);
     setScore("");
   };
 
+  // -------------------------------------------
+  // ENVIAR SCORE SEGURO
+  // -------------------------------------------
   const submitScore = async () => {
     if (!selectedTeam || !score) {
-      alert("Completa el puntaje");
+      alert("Falta puntaje");
       return;
     }
 
-    await fetch("https://roborave.onrender.com/api/submit", {
+    const token = localStorage.getItem("judgeToken");
+
+    const r = await fetch("https://roborave.onrender.com/api/submit", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token,
+      },
       body: JSON.stringify({
         teamId: selectedTeam.id,
         category: selectedTeam.category,
-        heat: 1, // puedes cambiarlo después
-        score: {
-          points: Number(score),
-        },
+        heat: 1,
+        score: { points: Number(score) },
       }),
     });
+
+    const json = await r.json();
+
+    if (!json.ok) {
+      alert("Error enviando puntaje");
+      return;
+    }
 
     alert("Puntaje registrado");
 
@@ -36,51 +67,68 @@ export default function JudgeDashboard() {
   };
 
   return (
-    <div style={{ padding: 30 }}>
+    <div style={{ padding: 40 }}>
       <h1>Panel de Juez</h1>
 
-      {/* LISTA DE EQUIPOS */}
-      <div style={{ marginTop: 20 }}>
-        {fallbackTeams.map((team) => (
+      {/* GRID DE EQUIPOS */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+        {teams.map(team => (
           <div
             key={team.id}
-            onClick={() => openModal(team)}
+            
             style={{
-              padding: 15,
-              marginBottom: 12,
-              background: "#f3f3f3",
-              borderRadius: 10,
+              background: "#eee",
+              padding: 16,
+              borderRadius: 8,
               cursor: "pointer",
             }}
+            onClick={() => openModal(team)}
           >
             <strong>{team.name}</strong>
-            <div style={{ fontSize: 12, opacity: 0.7 }}>
-              {team.category}
-            </div>
+            <div>{team.category}</div>
           </div>
         ))}
       </div>
 
-      {/* MODAL */}
+      {/* MODAL PARA PUNTUAR */}
       {selectedTeam && (
         <div
           style={{
             position: "fixed",
-            top: 0, left: 0, width: "100%", height: "100%",
-            background: "rgba(0,0,0,0.5)",
-            display: "flex", justifyContent: "center", alignItems: "center",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.6)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
           }}
         >
-          <div style={{ background: "white", padding: 30, borderRadius: 10 }}>
+          <div
+            style={{
+              background: "white",
+              padding: 30,
+              borderRadius: 12,
+              width: "100%",
+              maxWidth: 450,
+            }}
+          >
             <h2>{selectedTeam.name}</h2>
 
             <input
-              type="number"
+
               value={score}
               onChange={(e) => setScore(e.target.value)}
+              type="number"
               placeholder="Puntaje"
               style={{
-                padding: 12, width: "100%", marginTop: 20, borderRadius: 8,
+                padding: 12,
+                width: "100%",
+                marginTop: 12,
+                borderRadius: 8,
+                fontSize: 18,
               }}
             />
 
@@ -101,10 +149,12 @@ export default function JudgeDashboard() {
               onClick={() => setSelectedTeam(null)}
               style={{
                 marginTop: 10,
-                padding: 10,
+                padding: 12,
                 width: "100%",
-                background: "#ccc",
+                fontSize: 18,
                 borderRadius: 8,
+                background: "#ccc",
+              
               }}
             >
               Cancelar
