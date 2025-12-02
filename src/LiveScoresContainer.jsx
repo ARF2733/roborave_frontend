@@ -11,40 +11,42 @@ export default function LiveScoresContainer() {
         const r = await fetch("https://roborave.onrender.com/api/scores");
         const json = await r.json();
 
-        // Convertir backend → frontend
-        const mapped = json.teams.map(t => {
-          const fallback = fallbackTeams.find(f => f.id === t.teamId);
+        // backend solo tiene equipos puntuados
+        const scored = json.teams;
+
+        // combinar fallback + scores reales
+        const merged = fallbackTeams.map(f => {
+          const match = scored.find(s => s.teamId === f.id);
 
           return {
-            id: t.teamId,
-            name: fallback?.name || "Unknown",
-            category: t.category,
-            flag: fallback?.flag || "mx",
-            logo: fallback?.logo || "default.png",
+            id: f.id,
+            name: f.name,
+            logo: f.logo,
+            flag: f.flag,
+            category: f.category,
 
-            // score principal = points del heat 1
-            score: t.heats?.["1"]?.points || 0,
+            // score real → si existe
+            score: match?.heats?.["1"]?.points || 0,
 
-            // guardar heats completos por si los necesitas después
-            heats: t.heats || {}
+            // heats reales
+            heats: match?.heats || {}
           };
         });
 
-        setTeams(mapped);
+        setTeams(merged);
+
       } catch (err) {
-        console.error("Error loading scores:", err);
+        console.error("Error loading live scores:", err);
       }
     };
 
-    // Carga inicial
-    load();
 
-    // Polling cada 2 segundos
+    load();
+  
+    
     const interval = setInterval(load, 2000);
     return () => clearInterval(interval);
   }, []);
 
-  return (
-    <LiveHeatsByCategory teams={teams} />
-  );
+  return <LiveHeatsByCategory teams={teams} />;
 }
