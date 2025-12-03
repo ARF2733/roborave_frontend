@@ -195,9 +195,9 @@ const styles = {
     fontSize: "20px",
     fontWeight: 800,
     letterSpacing: "0.16em",
-    color: "#ffebee",
+    color: "#ffffffff",
     textTransform: "uppercase",
-    textShadow: "0 0 16px rgba(255,0,0,0.35)",
+    textShadow: "0 0 16px rgba(255, 255, 255, 0.4)",
   },
 
   columnsWrapper: {
