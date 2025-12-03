@@ -194,7 +194,7 @@ const styles = {
     fontWeight: 900,
     marginBottom: "40px",
     letterSpacing: "0.15em",
-    color: "#ffffffff",
+    color: "#ffffff",
     textShadow: "0 0 18px rgba(255, 255, 255, 0.35)",
   },
 
@@ -206,7 +206,7 @@ const styles = {
   },
 
   column: {
-    minWidth: "200px",
+    minWidth: "220px",
     background: "rgba(255,255,255,0.05)",
     padding: "18px",
     borderRadius: "16px",
@@ -227,56 +227,65 @@ const styles = {
   matchList: {
     display: "flex",
     flexDirection: "column",
-    gap: "14px",
+    gap: "16px",
   },
 
   matchCard: {
-    padding: "14px",
-    borderRadius: "12px",
+    padding: "16px",
+    borderRadius: "14px",
     background: "rgba(255,255,255,0.10)",
     border: "1px solid rgba(255,255,255,0.15)",
     backdropFilter: "blur(8px)",
   },
 
+  /* -------------------- FILA CON LOGOS -------------------- */
   matchRowWithLogos: {
     display: "grid",
-    gridTemplateColumns: "40px 1fr 40px 1fr 40px",
+    gridTemplateColumns: "96px 1fr 96px 1fr 96px",
     alignItems: "center",
     gap: "10px",
-    fontSize: "13px",
+    fontSize: "14px",
     fontWeight: 600,
     color: "white",
   },
 
+  /* -------------------- LOGOS -------------------- */
   teamLogo: {
-    width: "34px",
-    height: "34px",
-    borderRadius: "6px",
-    objectFit: "contain",
-    background: "rgba(255,255,255,0.10)",
-    padding: "4px",
+    width: "96px",
+    height: "96px",
+    borderRadius: "8px",
+    objectFit: "cover",
+    background: "rgba(255,255,255,0.12)",
+    padding: "3px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.35)",
   },
 
   teamLogoPlaceholder: {
-    width: "34px",
-    height: "34px",
-    borderRadius: "6px",
+    width: "96px",
+    height: "96px",
+    borderRadius: "8px",
     background: "rgba(255,255,255,0.10)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     opacity: 0.6,
+    boxShadow: "0 2px 6px rgba(0,0,0,0.35)",
   },
 
+  /* -------------------- NOMBRE EQUIPO -------------------- */
   teamName: {
     textAlign: "center",
     flex: 1,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
 
   vs: {
     width: "40px",
     textAlign: "center",
     color: "rgba(255,255,255,0.6)",
+    fontSize: "12px",
   },
 
   winner: {
@@ -285,6 +294,7 @@ const styles = {
     color: "#ffebee",
   },
 
+  /* -------------------- CAMPEÓN -------------------- */
   championBox: {
     marginTop: "40px",
     padding: "20px",
@@ -313,6 +323,7 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    color: "white",
   },
 
   loading: {
@@ -320,3 +331,4 @@ const styles = {
     opacity: 0.8,
   },
 };
+
