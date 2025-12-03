@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { fallbackTeams } from "./fallbackTeams";
 
 export default function Finals() {
-  const [bracket, setBracket] = useState(null);
+  const [categories, setCategories] = useState({});
+  const [selectedCat, setSelectedCat] = useState(null);
   const [loading, setLoading] = useState(true);
 
   function getTeam(id) {
@@ -13,17 +14,28 @@ export default function Finals() {
   useEffect(() => {
     const load = async () => {
       try {
-        const r = await fetch("https://roborave.onrender.com/api/bracket");
+        const r = await fetch("https://roborave.onrender.com/api/brackets");
         const json = await r.json();
-        setBracket(json);
+
+        if (json.ok && json.categories) {
+          setCategories(json.categories);
+
+          // Selección inicial automática
+          if (!selectedCat) {
+            const first = Object.keys(json.categories)[0];
+            if (first) setSelectedCat(first);
+          }
+        }
+
         setLoading(false);
       } catch {
         setLoading(false);
       }
     };
+
     load();
-    const i = setInterval(load, 2000);
-    return () => clearInterval(i);
+    const itv = setInterval(load, 2000);
+    return () => clearInterval(itv);
   }, []);
 
   if (loading) {
@@ -34,67 +46,95 @@ export default function Finals() {
     );
   }
 
-  if (!bracket) {
+  if (!Object.keys(categories).length) {
     return (
       <div style={styles.loadingRoot}>
-        <div style={styles.loading}>Sin datos</div>
+        <div style={styles.loading}>Sin brackets generados</div>
       </div>
     );
   }
 
+  const current = categories[selectedCat];
+
   return (
     <div style={styles.root}>
       <img src="/roborave_logo_white.svg" style={styles.logo} />
-
       <h1 style={styles.title}>ROBORAVE FINALS</h1>
 
+      {/* SELECTOR DE CATEGORÍA */}
+      <select
+        value={selectedCat || ""}
+        onChange={(e) => setSelectedCat(e.target.value)}
+        style={styles.dropdown}
+      >
+        {Object.keys(categories).map((cat) => (
+          <option key={cat} value={cat}>
+            {cat}
+          </option>
+        ))}
+      </select>
+
+      {/* BRACKET DE LA CATEGORÍA SELECCIONADA */}
+      {current && (
+        <div style={styles.categoryBlock}>
+          <h2 style={styles.categoryTitle}>{selectedCat}</h2>
+          <FinalsCategory data={current} getTeam={getTeam} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------- */
+/* -------------------- CATEGORY WRAPPER --------------------- */
+/* ---------------------------------------------------------- */
+
+function FinalsCategory({ data, getTeam }) {
+  return (
+    <>
       <div style={styles.columnsWrapper}>
-        {/* OCTAVOS */}
-        {bracket.round16.length > 0 && (
+        {data.round16?.length > 0 && (
           <FinalsColumn
             title="Octavos"
-            matches={bracket.round16}
+            matches={data.round16}
             getTeam={getTeam}
           />
         )}
 
-        {/* CUARTOS */}
-        {bracket.quarter.length > 0 && (
+        {data.quarter?.length > 0 && (
           <FinalsColumn
             title="Cuartos"
-            matches={bracket.quarter}
+            matches={data.quarter}
             getTeam={getTeam}
           />
         )}
 
-        {/* SEMIS */}
-        {bracket.semi.length > 0 && (
+        {data.semi?.length > 0 && (
           <FinalsColumn
             title="Semifinales"
-            matches={bracket.semi}
+            matches={data.semi}
             getTeam={getTeam}
           />
         )}
 
-        {/* FINAL */}
-        {bracket.final.length > 0 && (
+        {data.final?.length > 0 && (
           <FinalsColumn
             title="Final"
-            matches={bracket.final}
+            matches={data.final}
             getTeam={getTeam}
           />
         )}
       </div>
 
-      {bracket.champion && (
+      {data.champion && (
         <div style={styles.championBox}>
           <div style={styles.championTitle}>🏆 CAMPEÓN</div>
           <div style={styles.championTeam}>
-            {getTeam(bracket.champion)?.name || "—"}
+            {getTeam(data.champion)?.name || "—"}
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -103,13 +143,30 @@ export default function Finals() {
 /* ---------------------------------------------------------- */
 
 function FinalsColumn({ title, matches, getTeam }) {
+  const compact = title === "Final";
+
   return (
-    <div style={styles.column}>
+    <div
+      style={{
+        ...styles.column,
+        padding: compact ? "16px 14px" : styles.column.padding,
+      }}
+    >
       <div style={styles.columnTitle}>{title}</div>
 
-      <div style={styles.matchList}>
+      <div
+        style={{
+          ...styles.matchList,
+          gap: compact ? "10px" : styles.matchList.gap,
+        }}
+      >
         {matches.map((m) => (
-          <FinalsMatch key={m.id} match={m} getTeam={getTeam} />
+          <FinalsMatch
+            key={m.id}
+            match={m}
+            getTeam={getTeam}
+            compact={compact}
+          />
         ))}
       </div>
     </div>
@@ -120,38 +177,78 @@ function FinalsColumn({ title, matches, getTeam }) {
 /* -------------------------- MATCH -------------------------- */
 /* ---------------------------------------------------------- */
 
-function FinalsMatch({ match, getTeam }) {
+function FinalsMatch({ match, getTeam, compact }) {
   const A = getTeam(match.a);
   const B = getTeam(match.b);
 
+  if (compact) {
+    return (
+      <div style={styles.matchCard}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr auto 1fr",
+            alignItems: "center",
+            gap: "12px",
+            width: "100%",
+          }}
+        >
+          {/* A */}
+          <div style={{ textAlign: "center" }}>
+            {A ? (
+              <img src={`/logos/${A.logo}`} style={styles.teamLogo} />
+            ) : (
+              <div style={styles.teamLogoPlaceholder}>–</div>
+            )}
+            <div style={styles.teamName}>{A?.name || "—"}</div>
+          </div>
+
+          <div style={{ fontSize: "20px", fontWeight: 900, opacity: 0.8 }}>
+            VS
+          </div>
+
+          {/* B */}
+          <div style={{ textAlign: "center" }}>
+            {B ? (
+              <img src={`/logos/${B.logo}`} style={styles.teamLogo} />
+            ) : (
+              <div style={styles.teamLogoPlaceholder}>–</div>
+            )}
+            <div style={styles.teamName}>{B?.name || "—"}</div>
+          </div>
+        </div>
+
+        {match.winner && (
+          <div style={styles.winner}>
+            Ganador: <strong>{getTeam(match.winner)?.name || "—"}</strong>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div style={styles.matchCard} className="score-card">
+    <div style={styles.matchCard}>
       <div style={styles.matchRowWithLogos}>
-        {/* LOGO A */}
         {A ? (
           <img src={`/logos/${A.logo}`} style={styles.teamLogo} />
         ) : (
           <div style={styles.teamLogoPlaceholder}>–</div>
         )}
 
-        {/* NOMBRE A */}
         <div style={styles.teamName}>{A?.name || "—"}</div>
 
-        {/* VS */}
         <div style={styles.vs}>VS</div>
 
-        {/* LOGO B */}
         {B ? (
           <img src={`/logos/${B.logo}`} style={styles.teamLogo} />
         ) : (
           <div style={styles.teamLogoPlaceholder}>–</div>
         )}
 
-        {/* NOMBRE B */}
         <div style={styles.teamName}>{B?.name || "—"}</div>
       </div>
 
-      {/* GANADOR */}
       {match.winner && (
         <div style={styles.winner}>
           Ganador: <strong>{getTeam(match.winner)?.name || "—"}</strong>
@@ -164,8 +261,6 @@ function FinalsMatch({ match, getTeam }) {
 /* ---------------------------------------------------------- */
 /* --------------------------- ESTILOS ----------------------- */
 /* ---------------------------------------------------------- */
-
-
 
 const styles = {
   root: {
@@ -181,7 +276,6 @@ const styles = {
       "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif",
   },
 
-  /* ---------- LOGO GLOBAL (RoboRAVE) ---------- */
   logo: {
     height: "84px",
     objectFit: "contain",
@@ -193,10 +287,35 @@ const styles = {
   title: {
     fontSize: "32px",
     fontWeight: 900,
-    marginBottom: "42px",
+    marginBottom: "22px",
     letterSpacing: "0.18em",
     color: "#ffffff",
     textShadow: "0 0 20px rgba(255,255,255,0.35)",
+  },
+
+  dropdown: {
+    padding: "12px 14px",
+    fontSize: "16px",
+    borderRadius: "12px",
+    marginBottom: "32px",
+    background: "rgba(255,255,255,0.1)",
+    color: "white",
+    border: "1px solid rgba(255,255,255,0.25)",
+    backdropFilter: "blur(6px)",
+  },
+
+  categoryBlock: {
+    marginBottom: "60px",
+  },
+
+  categoryTitle: {
+    fontSize: "24px",
+    fontWeight: 900,
+    marginBottom: "24px",
+    letterSpacing: "0.08em",
+    color: "#ffefef",
+    textShadow: "0 0 12px rgba(255,200,200,0.35)",
+    textTransform: "uppercase",
   },
 
   columnsWrapper: {
@@ -232,7 +351,6 @@ const styles = {
     gap: "16px",
   },
 
-  /* ---------- MATCH CARD ---------- */
   matchCard: {
     padding: "18px 16px",
     borderRadius: "14px",
@@ -242,7 +360,6 @@ const styles = {
     boxShadow: "0 4px 14px rgba(0,0,0,0.45)",
   },
 
-  /* ---- VERTICAL LAYOUT (logo arriba / texto abajo) ---- */
   matchRowWithLogos: {
     display: "flex",
     flexDirection: "column",
@@ -258,8 +375,7 @@ const styles = {
     objectFit: "cover",
     background: "rgba(255,255,255,0.08)",
     padding: "6px",
-    boxShadow:
-      "0 0 6px rgba(0,0,0,0.45), inset 0 0 4px rgba(255,255,255,0.15)",
+    boxShadow: "0 0 6px rgba(0,0,0,0.45), inset 0 0 4px rgba(255,255,255,0.15)",
   },
 
   teamLogoPlaceholder: {
@@ -289,7 +405,6 @@ const styles = {
     margin: "8px 0 4px",
   },
 
-  /* ---------- WINNER ---------- */
   winner: {
     marginTop: "10px",
     fontSize: "12px",
@@ -297,9 +412,8 @@ const styles = {
     fontWeight: 600,
   },
 
-  /* ---------- CHAMPION BOX ---------- */
   championBox: {
-    marginTop: "45px",
+    marginTop: "24px",
     padding: "24px",
     borderRadius: "20px",
     background: "rgba(255,255,255,0.15)",
@@ -321,7 +435,6 @@ const styles = {
     letterSpacing: "0.05em",
   },
 
-  /* ---------- LOADING ---------- */
   loadingRoot: {
     width: "100vw",
     height: "100vh",
