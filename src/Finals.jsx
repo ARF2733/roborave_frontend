@@ -166,6 +166,7 @@ function FinalsMatch({ match, getTeam }) {
 /* ---------------------------------------------------------- */
 
 
+
 const styles = {
   root: {
     width: "100vw",
@@ -180,34 +181,31 @@ const styles = {
       "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif",
   },
 
-  /* --------- LOGO --------- */
+  /* ---------- LOGO GLOBAL (RoboRAVE) ---------- */
   logo: {
     height: "84px",
     objectFit: "contain",
-    marginBottom: "12px",
+    marginBottom: "14px",
     filter:
-      "drop-shadow(0 0 6px rgba(255,255,255,0.25)) drop-shadow(0 0 26px rgba(255,255,255,0.20))",
+      "drop-shadow(0 0 8px rgba(255,255,255,0.25)) drop-shadow(0 0 24px rgba(255,255,255,0.20))",
   },
 
-  /* --------- TÍTULO --------- */
   title: {
     fontSize: "32px",
     fontWeight: 900,
-    marginBottom: "38px",
+    marginBottom: "42px",
     letterSpacing: "0.18em",
     color: "#ffffff",
-    textShadow: "0 0 22px rgba(255,255,255,0.35)",
+    textShadow: "0 0 20px rgba(255,255,255,0.35)",
   },
 
-  /* --------- CONTENEDOR COLUMNAS --------- */
   columnsWrapper: {
     display: "flex",
     justifyContent: "center",
-    gap: "26px",
+    gap: "28px",
     flexWrap: "wrap",
   },
 
-  /* --------- COLUMNA (Semis, Cuartos, Final) --------- */
   column: {
     minWidth: "260px",
     background: "rgba(255,255,255,0.05)",
@@ -225,18 +223,18 @@ const styles = {
     color: "#ffebee",
     marginBottom: "16px",
     letterSpacing: "0.05em",
-    textShadow: "0 0 12px rgba(255,180,180,0.25)",
+    textShadow: "0 0 10px rgba(255,180,180,0.25)",
   },
 
   matchList: {
     display: "flex",
     flexDirection: "column",
-    gap: "14px",
+    gap: "16px",
   },
 
-  /* --------- TARJETAS DE MATCH --------- */
+  /* ---------- MATCH CARD ---------- */
   matchCard: {
-    padding: "16px",
+    padding: "18px 16px",
     borderRadius: "14px",
     background: "rgba(255,255,255,0.10)",
     border: "1px solid rgba(255,255,255,0.15)",
@@ -244,59 +242,54 @@ const styles = {
     boxShadow: "0 4px 14px rgba(0,0,0,0.45)",
   },
 
-  /* --------- FILA CON LOGOS Y NOMBRES (desktop) --------- */
+  /* ---- VERTICAL LAYOUT (logo arriba / texto abajo) ---- */
   matchRowWithLogos: {
-    display: "grid",
-    gridTemplateColumns: "68px 1fr 40px 68px 1fr",
+    display: "flex",
+    flexDirection: "column",
     alignItems: "center",
-    gap: "12px",
-    fontSize: "14px",
-    fontWeight: 600,
+    gap: "14px",
     color: "white",
   },
 
-  /* --------- LOGOS --------- */
   teamLogo: {
-    width: "68px",
-    height: "68px",
+    width: "72px",
+    height: "72px",
     borderRadius: "12px",
-    objectFit: "contain",
+    objectFit: "cover",
     background: "rgba(255,255,255,0.08)",
-    padding: "4px",
+    padding: "6px",
     boxShadow:
       "0 0 6px rgba(0,0,0,0.45), inset 0 0 4px rgba(255,255,255,0.15)",
   },
 
   teamLogoPlaceholder: {
-    width: "68px",
-    height: "68px",
+    width: "72px",
+    height: "72px",
     borderRadius: "12px",
     background: "rgba(255,255,255,0.10)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     opacity: 0.6,
-    fontSize: "30px",
+    fontSize: "32px",
   },
 
-  /* --------- NOMBRES --------- */
   teamName: {
-    textAlign: "center",
+    fontSize: "15px",
     fontWeight: 700,
-    lineHeight: "18px",
-    whiteSpace: "normal",
-  },
-
-  /* --------- VS --------- */
-  vs: {
-    width: "40px",
     textAlign: "center",
-    color: "rgba(255,255,255,0.6)",
-    fontSize: "13px",
-    fontWeight: 800,
+    maxWidth: "180px",
+    lineHeight: "18px",
   },
 
-  /* --------- GANADOR --------- */
+  vs: {
+    fontSize: "18px",
+    fontWeight: 900,
+    color: "rgba(255,255,255,0.7)",
+    margin: "8px 0 4px",
+  },
+
+  /* ---------- WINNER ---------- */
   winner: {
     marginTop: "10px",
     fontSize: "12px",
@@ -304,10 +297,10 @@ const styles = {
     fontWeight: 600,
   },
 
-  /* --------- CAMPEÓN --------- */
+  /* ---------- CHAMPION BOX ---------- */
   championBox: {
-    marginTop: "42px",
-    padding: "22px",
+    marginTop: "45px",
+    padding: "24px",
     borderRadius: "20px",
     background: "rgba(255,255,255,0.15)",
     border: "1px solid rgba(255,255,255,0.25)",
@@ -328,46 +321,18 @@ const styles = {
     letterSpacing: "0.05em",
   },
 
-  /* --------- LOADING --------- */
+  /* ---------- LOADING ---------- */
   loadingRoot: {
     width: "100vw",
     height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    color: "white",
   },
 
   loading: {
     fontSize: "18px",
     opacity: 0.8,
-  },
-
-  /* --------- RESPONSIVE (MOBILE-FIRST) --------- */
-  "@media (max-width: 480px)": {
-    matchRowWithLogos: {
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: "10px",
-    },
-
-    vs: {
-      margin: "4px 0",
-      fontSize: "15px",
-      fontWeight: 900,
-    },
-
-    teamLogo: {
-      width: "80px",
-      height: "80px",
-    },
-
-    teamName: {
-      fontSize: "15px",
-      fontWeight: 700,
-      marginTop: "4px",
-    },
   },
 };
 
