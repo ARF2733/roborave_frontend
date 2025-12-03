@@ -1,92 +1,208 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { fallbackTeams } from "./fallbackTeams";
 
-export default function Judge() {
+export default function JudgeDashboard() {
   const navigate = useNavigate();
-  const [pin, setPin] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const loginJudge = async () => {
-    if (!pin || pin.length < 1) {
-      alert("Ingresa tu PIN");
+  const [teams, setTeams] = useState(fallbackTeams);
+  const [filteredCategory, setFilteredCategory] = useState("ALL");
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [score, setScore] = useState("");
+
+  // Extraer categorías únicas
+  const categories = [
+    "ALL",
+    ...Array.from(new Set(fallbackTeams.map((t) => t.category))),
+  ];
+
+  // --------------------------------------------------
+  // BLOQUEO DE RUTA SIN TOKEN
+  // --------------------------------------------------
+  useEffect(() => {
+    const token = localStorage.getItem("judgeToken");
+    if (!token) {
+      alert("No autorizado");
+      navigate("/judge");
+    }
+  }, []);
+
+  // --------------------------------------------------
+  // FILTRAR EQUIPOS
+  // --------------------------------------------------
+  const filteredTeams =
+    filteredCategory === "ALL"
+      ? teams
+      : teams.filter((t) => t.category === filteredCategory);
+
+  // --------------------------------------------------
+  // ABRIR MODAL
+  // --------------------------------------------------
+  const openModal = (team) => {
+    setSelectedTeam(team);
+    setScore("");
+  };
+
+  // --------------------------------------------------
+  // ENVIAR SCORE
+  // --------------------------------------------------
+  const submitScore = async () => {
+    if (!selectedTeam || !score) {
+      alert("Falta puntaje");
       return;
     }
 
-    setLoading(true);
+    const token = localStorage.getItem("judgeToken");
+
+    const r = await fetch("https://roborave.onrender.com/api/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+      body: JSON.stringify({
+        teamId: selectedTeam.id,
+        category: selectedTeam.category,
+        heat: 1,
+        score: { points: Number(score) },
+      }),
+    });
+
+    const json = await r.json();
+
+    if (!json.ok) {
+      alert("Error enviando puntaje");
+      return;
+    }
+
+    alert("Puntaje registrado");
+    setSelectedTeam(null);
+    setScore("");
+  };
+
+  // --------------------------------------------------
+  // GENERAR BRACKET
+  // --------------------------------------------------
+  const generateBracket = async () => {
+    const token = localStorage.getItem("judgeToken");
+    if (!token) {
+      alert("No autorizado");
+      return;
+    }
 
     try {
-      const r = await fetch("https://roborave.onrender.com/api/judge/login", {
+      const r = await fetch("https://roborave.onrender.com/api/bracket/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        }
       });
 
       const json = await r.json();
 
       if (!json.ok) {
-        setLoading(false);
-        alert("PIN incorrecto");
+        alert(json.error || "Error generando bracket");
         return;
       }
 
-      localStorage.setItem("judgeToken", json.token);
+      alert("Bracket generado con éxito");
+      navigate("/bracket");
 
-      navigate("/judge/dashboard");
     } catch (err) {
       alert("Error de conexión");
-      setLoading(false);
     }
   };
 
   return (
     <div style={styles.root}>
-      <div style={styles.panel} className="score-card">
+      <div style={styles.container}>
+        <h1 style={styles.title}>Panel de Jueces</h1>
 
-        <img
-          src="/roborave_logo_white.svg"
-          alt="RoboRAVE"
-          style={styles.logo}
-        />
-
-        <div style={styles.title}>ACCESO PARA JUECES</div>
-
-        {/* INPUT PIN */}
-        <input
-          type="password"
-          value={pin}
-          onChange={(e) => setPin(e.target.value)}
-          placeholder="Ingresa tu PIN"
-          style={styles.input}
-        />
-
-        {/* BOTÓN ENTRAR */}
-        <button
-          onClick={loginJudge}
-          disabled={loading}
-          style={{
-            ...styles.button,
-            opacity: loading ? 0.6 : 1,
-          }}
-        >
-          {loading ? "Conectando..." : "Entrar"}
+        {/* BOTÓN PREMIUM PARA BRACKET */}
+        <button onClick={generateBracket} style={styles.bracketButton}>
+          Generar Bracket Eliminatorio
         </button>
 
-        {/* BOTÓN BRACKET */}
-        <button
-          onClick={() => navigate("/bracket")}
-          style={{
-            ...styles.buttonAlt,
-          }}
-        >
-          Bracket Eliminatorio
-        </button>
+        {/* FILTRO DE CATEGORÍAS */}
+        <div style={styles.filterWrapper}>
+          <div style={styles.fadeLeft} />
+          <div style={styles.filterBar}>
+            {categories.map((cat) => (
+              <div
+                key={cat}
+                onClick={() => setFilteredCategory(cat)}
+                style={{
+                  ...styles.filterChip,
+                  background:
+                    filteredCategory === cat
+                      ? "rgba(255,255,255,0.22)"
+                      : "rgba(255,255,255,0.08)",
+                  border:
+                    filteredCategory === cat
+                      ? "1px solid rgba(255,255,255,0.35)"
+                      : "1px solid rgba(255,255,255,0.16)",
+                }}
+              >
+                {cat}{" "}
+                {cat !== "ALL" &&
+                  `(${teams.filter((t) => t.category === cat).length})`}
+              </div>
+            ))}
+          </div>
+          <div style={styles.fadeRight} />
+        </div>
 
+        {/* GRID PREMIUM */}
+        <div style={styles.grid}>
+          {filteredTeams.map((team) => (
+            <div
+              key={team.id}
+              className="score-card"
+              onClick={() => openModal(team)}
+              style={styles.teamCard}
+            >
+              <div style={styles.teamName}>{team.name}</div>
+              <div style={styles.category}>{team.category}</div>
+            </div>
+          ))}
+        </div>
       </div>
+
+      {/* MODAL PREMIUM */}
+      {selectedTeam && (
+        <div style={styles.modalBackdrop}>
+          <div style={styles.modal}>
+            <div style={styles.modalTitle}>{selectedTeam.name}</div>
+
+            <input
+              value={score}
+              onChange={(e) => setScore(e.target.value)}
+              type="number"
+              placeholder="Puntaje"
+              style={styles.input}
+            />
+
+            <button onClick={submitScore} style={styles.buttonPrimary}>
+              Registrar Puntaje
+            </button>
+
+            <button
+              onClick={() => setSelectedTeam(null)}
+              style={styles.buttonSecondary}
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-/* ---------------- ESTILOS PREMIUM ---------------- */
+/* -------------------------------------------------- */
+/* ------------------- ESTILOS ---------------------- */
+/* -------------------------------------------------- */
 
 const styles = {
   root: {
@@ -94,81 +210,168 @@ const styles = {
     height: "100vh",
     background:
       "radial-gradient(circle at 50% -40vh, #262626 0, #0b0b0b 45%, #000 100%)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
     padding: 20,
     boxSizing: "border-box",
+    display: "flex",
+    justifyContent: "center",
+    overflowY: "auto",
   },
 
-  panel: {
+  container: {
     width: "100%",
-    maxWidth: "420px",
-    padding: "34px 30px",
-    borderRadius: "18px",
-    background: "rgba(255,255,255,0.06)",
-    backdropFilter: "blur(6px)",
-    border: "1px solid rgba(255,255,255,0.12)",
-    textAlign: "center",
+    maxWidth: "800px",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
-    gap: "28px",
-  },
-
-  logo: {
-    height: "60px",
-    objectFit: "contain",
-    filter:
-      "drop-shadow(0 0 6px rgba(255,255,255,0.18)) drop-shadow(0 0 12px rgba(255,255,255,0.25))",
-    marginBottom: "-8px",
+    gap: "22px",
   },
 
   title: {
-    fontSize: "18px",
-    fontWeight: 700,
-    letterSpacing: "0.18em",
+    fontSize: "26px",
+    fontWeight: 800,
+    letterSpacing: "0.12em",
     color: "#ffebee",
-    marginBottom: "4px",
+    textAlign: "center",
   },
 
-  input: {
-    padding: "14px 16px",
-    width: "100%",
-    borderRadius: "12px",
-    border: "1px solid rgba(255,255,255,0.18)",
-    background: "rgba(255,255,255,0.08)",
+  // 🔥 BOTÓN BRACKET
+  bracketButton: {
+    background: "linear-gradient(90deg, #ff4d4d, #ff1a1a)",
+    padding: "14px",
+    borderRadius: "14px",
+    border: "1px solid rgba(255,255,255,0.25)",
     color: "white",
+    fontWeight: 700,
     fontSize: "16px",
-    outline: "none",
+    cursor: "pointer",
+    textAlign: "center",
+    letterSpacing: "0.05em",
+    boxShadow: "0 4px 15px rgba(255,0,0,0.25)",
   },
 
-  button: {
-    width: "100%",
-    padding: "15px",
+  /* Filtro */
+  filterWrapper: {
+    position: "relative",
+  },
+
+  filterBar: {
+    display: "flex",
+    gap: "10px",
+    overflowX: "auto",
+    padding: "8px 0",
+    paddingTop: "6px",
+  },
+
+  filterChip: {
+    padding: "8px 14px",
     borderRadius: "12px",
+    color: "white",
+    cursor: "pointer",
+    fontSize: "13px",
+  },
+
+  fadeLeft: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "30px",
+    height: "100%",
+    background:
+      "linear-gradient(to right, rgba(0,0,0,0.85), rgba(0,0,0,0))",
+    pointerEvents: "none",
+  },
+
+  fadeRight: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: "30px",
+    height: "100%",
+    background:
+      "linear-gradient(to left, rgba(0,0,0,0.85), rgba(0,0,0,0))",
+    pointerEvents: "none",
+  },
+
+  grid: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+  },
+
+  teamCard: {
     background: "rgba(255,255,255,0.10)",
-    border: "1px solid rgba(255,255,255,0.18)",
+    borderRadius: "14px",
+    padding: "18px 20px",
+    border: "1px solid rgba(255,255,255,0.15)",
+    cursor: "pointer",
+  },
+
+  teamName: {
     color: "white",
     fontSize: "17px",
     fontWeight: 700,
-    letterSpacing: "0.06em",
-    boxShadow: "0 4px 14px rgba(0,0,0,0.45)",
-    transition: "0.25s ease",
   },
 
-  // ⭐ Botón alternativo para el Bracket
-  buttonAlt: {
+  category: {
+    color: "rgba(255,255,255,0.7)",
+    fontSize: "13px",
+  },
+
+  modalBackdrop: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100vw",
+    height: "100vh",
+    background: "rgba(0,0,0,0.75)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modal: {
     width: "100%",
-    padding: "13px",
+    maxWidth: "420px",
+    background: "rgba(20,20,20,0.9)",
+    borderRadius: "18px",
+    padding: "28px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "18px",
+  },
+
+  modalTitle: {
+    fontSize: "20px",
+    fontWeight: 700,
+    textAlign: "center",
+    color: "white",
+  },
+
+  input: {
+    padding: "14px",
     borderRadius: "12px",
-    background: "rgba(255,255,255,0.18)",
-    border: "1px solid rgba(255,255,255,0.22)",
+    background: "rgba(255,255,255,0.08)",
+    border: "1px solid rgba(255,255,255,0.25)",
+    color: "white",
+    fontSize: "17px",
+  },
+
+  buttonPrimary: {
+    padding: "14px",
+    borderRadius: "12px",
+    background: "rgba(255,255,255,0.15)",
+    border: "1px solid rgba(255,255,255,0.25)",
+    color: "white",
+    fontSize: "17px",
+    fontWeight: 700,
+  },
+
+  buttonSecondary: {
+    padding: "12px",
+    borderRadius: "12px",
+    background: "rgba(255,255,255,0.10)",
+    border: "1px solid rgba(255,255,255,0.20)",
     color: "white",
     fontSize: "15px",
     fontWeight: 600,
-    letterSpacing: "0.04em",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.35)",
-    transition: "0.2s ease",
   },
 };

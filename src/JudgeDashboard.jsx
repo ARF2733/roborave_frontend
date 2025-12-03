@@ -10,7 +10,7 @@ export default function JudgeDashboard() {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [score, setScore] = useState("");
 
-  // Extraer categorías únicas
+  // Categorías únicas
   const categories = [
     "ALL",
     ...Array.from(new Set(fallbackTeams.map((t) => t.category))),
@@ -25,7 +25,7 @@ export default function JudgeDashboard() {
       alert("No autorizado");
       navigate("/judge");
     }
-  }, []);
+  }, [navigate]);
 
   // --------------------------------------------------
   // FILTRAR EQUIPOS
@@ -81,7 +81,7 @@ export default function JudgeDashboard() {
   };
 
   // --------------------------------------------------
-  // GENERAR BRACKET
+  // GENERAR BRACKET (POR CATEGORÍA ACTUAL)
   // --------------------------------------------------
   const generateBracket = async () => {
     const token = localStorage.getItem("judgeToken");
@@ -90,14 +90,23 @@ export default function JudgeDashboard() {
       return;
     }
 
+    if (filteredCategory === "ALL") {
+      alert("Selecciona una categoría específica para generar el bracket.");
+      return;
+    }
+
     try {
-      const r = await fetch("https://roborave.onrender.com/api/bracket/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
+      const r = await fetch(
+        "https://roborave.onrender.com/api/bracket/generate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+          body: JSON.stringify({ category: filteredCategory }),
         }
-      });
+      );
 
       const json = await r.json();
 
@@ -106,9 +115,8 @@ export default function JudgeDashboard() {
         return;
       }
 
-      alert("Bracket generado con éxito");
+      alert(`Bracket generado para ${filteredCategory}`);
       navigate("/bracket");
-
     } catch (err) {
       alert("Error de conexión");
     }
@@ -119,9 +127,9 @@ export default function JudgeDashboard() {
       <div style={styles.container}>
         <h1 style={styles.title}>Panel de Jueces</h1>
 
-        {/* BOTÓN PREMIUM PARA BRACKET */}
+        {/* BOTÓN BRACKET (usa la categoría actual) */}
         <button onClick={generateBracket} style={styles.bracketButton}>
-          Generar Bracket Eliminatorio
+          Generar Bracket Eliminatorio (categoría actual)
         </button>
 
         {/* FILTRO DE CATEGORÍAS */}
@@ -233,7 +241,6 @@ const styles = {
     textAlign: "center",
   },
 
-  // 🔥 BOTÓN BRACKET
   bracketButton: {
     background: "linear-gradient(90deg, #ff4d4d, #ff1a1a)",
     padding: "14px",
@@ -248,7 +255,6 @@ const styles = {
     boxShadow: "0 4px 15px rgba(255,0,0,0.25)",
   },
 
-  /* Filtro */
   filterWrapper: {
     position: "relative",
   },
