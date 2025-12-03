@@ -29,12 +29,9 @@ export default function Judge() {
         return;
       }
 
-      // Guardar token válido
       localStorage.setItem("judgeToken", json.token);
 
-      // Ir al dashboard del juez
       navigate("/judge/dashboard");
-
     } catch (err) {
       alert("Error de conexión");
       setLoading(false);
@@ -53,6 +50,7 @@ export default function Judge() {
 
         <div style={styles.title}>ACCESO PARA JUECES</div>
 
+        {/* INPUT PIN */}
         <input
           type="password"
           value={pin}
@@ -61,6 +59,7 @@ export default function Judge() {
           style={styles.input}
         />
 
+        {/* BOTÓN ENTRAR */}
         <button
           onClick={loginJudge}
           disabled={loading}
@@ -71,6 +70,17 @@ export default function Judge() {
         >
           {loading ? "Conectando..." : "Entrar"}
         </button>
+
+        {/* BOTÓN BRACKET */}
+        <button
+          onClick={() => navigate("/bracket")}
+          style={{
+            ...styles.buttonAlt,
+          }}
+        >
+          Bracket Eliminatorio
+        </button>
+
       </div>
     </div>
   );
@@ -143,8 +153,22 @@ const styles = {
     fontSize: "17px",
     fontWeight: 700,
     letterSpacing: "0.06em",
-    textAlign: "center",
     boxShadow: "0 4px 14px rgba(0,0,0,0.45)",
     transition: "0.25s ease",
+  },
+
+  // ⭐ Botón alternativo para el Bracket
+  buttonAlt: {
+    width: "100%",
+    padding: "13px",
+    borderRadius: "12px",
+    background: "rgba(255,255,255,0.18)",
+    border: "1px solid rgba(255,255,255,0.22)",
+    color: "white",
+    fontSize: "15px",
+    fontWeight: 600,
+    letterSpacing: "0.04em",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.35)",
+    transition: "0.2s ease",
   },
 };
