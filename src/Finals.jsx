@@ -165,59 +165,67 @@ function FinalsMatch({ match, getTeam }) {
 /* --------------------------- ESTILOS ----------------------- */
 /* ---------------------------------------------------------- */
 
+
 const styles = {
   root: {
     width: "100vw",
     minHeight: "100vh",
     background:
-      "radial-gradient(circle at 50% -40vh, #262626 0, #0b0b0b 45%, #000 100%)",
+      "radial-gradient(circle at 50% -40vh, #2a2a2a 0, #0b0b0b 45%, #000 100%)",
     padding: "40px 20px",
     boxSizing: "border-box",
     color: "white",
     textAlign: "center",
+    fontFamily:
+      "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif",
   },
 
+  /* --------- LOGO --------- */
   logo: {
-    height: "80px",
+    height: "84px",
     objectFit: "contain",
-    marginBottom: "10px",
+    marginBottom: "12px",
     filter:
-      "drop-shadow(0 0 6px rgba(255,255,255,0.25)) drop-shadow(0 0 20px rgba(255,255,255,0.18))",
+      "drop-shadow(0 0 6px rgba(255,255,255,0.25)) drop-shadow(0 0 26px rgba(255,255,255,0.20))",
   },
 
+  /* --------- TÍTULO --------- */
   title: {
-    fontSize: "30px",
+    fontSize: "32px",
     fontWeight: 900,
-    marginBottom: "40px",
-    letterSpacing: "0.15em",
-    color: "#ffffffff",
-    textShadow: "0 0 18px rgba(255,255,255,0.35)",
+    marginBottom: "38px",
+    letterSpacing: "0.18em",
+    color: "#ffffff",
+    textShadow: "0 0 22px rgba(255,255,255,0.35)",
   },
 
+  /* --------- CONTENEDOR COLUMNAS --------- */
   columnsWrapper: {
     display: "flex",
     justifyContent: "center",
-    gap: "24px",
+    gap: "26px",
     flexWrap: "wrap",
   },
 
+  /* --------- COLUMNA (Semis, Cuartos, Final) --------- */
   column: {
     minWidth: "260px",
     background: "rgba(255,255,255,0.05)",
-    padding: "18px",
-    borderRadius: "16px",
-    border: "1px solid rgba(255,255,255,0.10)",
-    backdropFilter: "blur(6px)",
-    boxShadow: "0 6px 18px rgba(0,0,0,0.5)",
+    padding: "20px 18px",
+    borderRadius: "18px",
+    border: "1px solid rgba(255,255,255,0.12)",
+    backdropFilter: "blur(8px)",
+    boxShadow: "0 8px 22px rgba(0,0,0,0.55)",
   },
 
   columnTitle: {
     textAlign: "center",
     fontWeight: 800,
-    fontSize: "17px",
+    fontSize: "18px",
     color: "#ffebee",
-    marginBottom: "14px",
+    marginBottom: "16px",
     letterSpacing: "0.05em",
+    textShadow: "0 0 12px rgba(255,180,180,0.25)",
   },
 
   matchList: {
@@ -226,87 +234,101 @@ const styles = {
     gap: "14px",
   },
 
+  /* --------- TARJETAS DE MATCH --------- */
   matchCard: {
-    padding: "14px",
-    borderRadius: "12px",
+    padding: "16px",
+    borderRadius: "14px",
     background: "rgba(255,255,255,0.10)",
     border: "1px solid rgba(255,255,255,0.15)",
-    backdropFilter: "blur(8px)",
+    backdropFilter: "blur(10px)",
+    boxShadow: "0 4px 14px rgba(0,0,0,0.45)",
   },
 
+  /* --------- FILA CON LOGOS Y NOMBRES (desktop) --------- */
   matchRowWithLogos: {
     display: "grid",
     gridTemplateColumns: "68px 1fr 40px 68px 1fr",
     alignItems: "center",
     gap: "12px",
-    fontSize: "13px",
+    fontSize: "14px",
     fontWeight: 600,
     color: "white",
   },
 
+  /* --------- LOGOS --------- */
   teamLogo: {
     width: "68px",
     height: "68px",
-    borderRadius: "10px",
+    borderRadius: "12px",
     objectFit: "contain",
-    background: "rgba(255,255,255,0.10)",
+    background: "rgba(255,255,255,0.08)",
     padding: "4px",
+    boxShadow:
+      "0 0 6px rgba(0,0,0,0.45), inset 0 0 4px rgba(255,255,255,0.15)",
   },
 
   teamLogoPlaceholder: {
     width: "68px",
     height: "68px",
-    borderRadius: "10px",
+    borderRadius: "12px",
     background: "rgba(255,255,255,0.10)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     opacity: 0.6,
-    fontSize: "28px",
+    fontSize: "30px",
   },
 
+  /* --------- NOMBRES --------- */
   teamName: {
     textAlign: "center",
-    flex: 1,
+    fontWeight: 700,
+    lineHeight: "18px",
     whiteSpace: "normal",
   },
 
+  /* --------- VS --------- */
   vs: {
     width: "40px",
     textAlign: "center",
     color: "rgba(255,255,255,0.6)",
-    fontSize: "12px",
-    fontWeight: 700,
+    fontSize: "13px",
+    fontWeight: 800,
   },
 
+  /* --------- GANADOR --------- */
   winner: {
     marginTop: "10px",
     fontSize: "12px",
     color: "#ffebee",
+    fontWeight: 600,
   },
 
+  /* --------- CAMPEÓN --------- */
   championBox: {
-    marginTop: "40px",
-    padding: "20px",
-    borderRadius: "18px",
+    marginTop: "42px",
+    padding: "22px",
+    borderRadius: "20px",
     background: "rgba(255,255,255,0.15)",
     border: "1px solid rgba(255,255,255,0.25)",
     textAlign: "center",
-    boxShadow: "0 10px 24px rgba(0,0,0,0.65)",
+    boxShadow: "0 10px 28px rgba(0,0,0,0.65)",
   },
 
   championTitle: {
-    fontSize: "18px",
-    marginBottom: "8px",
+    fontSize: "19px",
+    marginBottom: "10px",
     color: "#ffebee",
+    textShadow: "0 0 10px rgba(255,200,200,0.35)",
   },
 
   championTeam: {
-    fontSize: "22px",
+    fontSize: "24px",
     fontWeight: 900,
-    letterSpacing: "0.06em",
+    letterSpacing: "0.05em",
   },
 
+  /* --------- LOADING --------- */
   loadingRoot: {
     width: "100vw",
     height: "100vh",
@@ -321,26 +343,30 @@ const styles = {
     opacity: 0.8,
   },
 
-  /* ---------------- RESPONSIVE ---------------- */
+  /* --------- RESPONSIVE (MOBILE-FIRST) --------- */
   "@media (max-width: 480px)": {
     matchRowWithLogos: {
-      gridTemplateColumns: "1fr",
-      textAlign: "center",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
       gap: "10px",
     },
-    teamLogo: {
-      margin: "0 auto",
-    },
-    teamLogoPlaceholder: {
-      margin: "0 auto",
-    },
+
     vs: {
-      marginTop: "6px",
-      marginBottom: "6px",
+      margin: "4px 0",
+      fontSize: "15px",
+      fontWeight: 900,
     },
+
+    teamLogo: {
+      width: "80px",
+      height: "80px",
+    },
+
     teamName: {
-      fontSize: "14px",
-      lineHeight: "18px",
+      fontSize: "15px",
+      fontWeight: 700,
+      marginTop: "4px",
     },
   },
 };
