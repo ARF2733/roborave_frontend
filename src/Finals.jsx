@@ -11,6 +11,11 @@ export default function Finals() {
     return t ? t.name : `Equipo ${id}`;
   }
 
+  function getLogo(id) {
+    const t = fallbackTeams.find((x) => x.id === id);
+    return t ? `/logos/${t.logo}` : null;
+  }
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -45,98 +50,112 @@ export default function Finals() {
 
   return (
     <div style={styles.root}>
-      <div style={styles.container}>
-        {/* HEADER PREMIUM */}
-        <div style={styles.header}>
-          <img
-            src="/roborave_logo_white.svg"
-            alt="RoboRAVE"
-            style={styles.headerLogo}
+      <img src="/roborave_logo_white.svg" alt="RoboRAVE" style={styles.logo} />
+
+      <div style={styles.title}>ROBORAVE FINALS</div>
+
+      <div style={styles.columnsWrapper}>
+        {bracket.round16.length > 0 && (
+          <BracketColumn
+            title="Octavos"
+            matches={bracket.round16}
+            getTeamName={getTeamName}
+            getLogo={getLogo}
           />
-          <div style={styles.headerTitle}>ROBORAVE FINALS</div>
-        </div>
+        )}
 
-        {/* COLUMNAS DEL BRACKET */}
-        <div style={styles.columnsWrapper}>
-          {/* ROUND OF 16 */}
-          {bracket.round16.length > 0 && (
-            <BracketColumn
-              title="Octavos"
-              matches={bracket.round16}
-              getTeamName={getTeamName}
-            />
-          )}
+        {bracket.quarter.length > 0 && (
+          <BracketColumn
+            title="Cuartos"
+            matches={bracket.quarter}
+            getTeamName={getTeamName}
+            getLogo={getLogo}
+          />
+        )}
 
-          {/* QUARTER */}
-          {bracket.quarter.length > 0 && (
-            <BracketColumn
-              title="Cuartos"
-              matches={bracket.quarter}
-              getTeamName={getTeamName}
-            />
-          )}
+        {bracket.semi.length > 0 && (
+          <BracketColumn
+            title="Semifinales"
+            matches={bracket.semi}
+            getTeamName={getTeamName}
+            getLogo={getLogo}
+          />
+        )}
 
-          {/* SEMIS */}
-          {bracket.semi.length > 0 && (
-            <BracketColumn
-              title="Semifinales"
-              matches={bracket.semi}
-              getTeamName={getTeamName}
-            />
-          )}
-
-          {/* FINAL */}
-          {bracket.final.length > 0 && (
-            <BracketColumn
-              title="Final"
-              matches={bracket.final}
-              getTeamName={getTeamName}
-            />
-          )}
-        </div>
-
-        {/* CAMPEÓN */}
-        {bracket.champion && (
-          <div style={styles.championBox}>
-            <div style={styles.championTitle}>🏆 CAMPEÓN</div>
-            <div style={styles.championTeam}>
-              {getTeamName(bracket.champion)}
-            </div>
-          </div>
+        {bracket.final.length > 0 && (
+          <BracketColumn
+            title="Final"
+            matches={bracket.final}
+            getTeamName={getTeamName}
+            getLogo={getLogo}
+          />
         )}
       </div>
+
+      {bracket.champion && (
+        <div style={styles.championBox}>
+          <div style={styles.championTitle}>🏆 CAMPEÓN</div>
+          <div style={styles.championTeam}>
+            {getTeamName(bracket.champion)}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-/* -------------------------------------------------- */
-/* ------------------- COLUMNAS ---------------------- */
-/* -------------------------------------------------- */
+/* ------------------ COLUMNAS ------------------ */
 
-function BracketColumn({ title, matches, getTeamName }) {
+function BracketColumn({ title, matches, getTeamName, getLogo }) {
   return (
     <div style={styles.column}>
       <div style={styles.columnTitle}>{title}</div>
+
       <div style={styles.matchList}>
         {matches.map((m) => (
-          <BracketMatch key={m.id} match={m} getTeamName={getTeamName} />
+          <BracketMatch
+            key={m.id}
+            match={m}
+            getTeamName={getTeamName}
+            getLogo={getLogo}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-/* -------------------------------------------------- */
-/* ------------------ MATCH CARD --------------------- */
-/* -------------------------------------------------- */
+/* ------------------ MATCH CARD ------------------ */
 
-function BracketMatch({ match, getTeamName }) {
+function BracketMatch({ match, getTeamName, getLogo }) {
+  const logoA = getLogo(match.a);
+  const logoB = getLogo(match.b);
+
   return (
     <div style={styles.matchCard} className="score-card">
-      <div style={styles.matchRow}>
-        <span style={styles.team}>{getTeamName(match.a)}</span>
+      <div style={styles.matchRowWithLogos}>
+        {/* LOGO A */}
+        {logoA ? (
+          <img src={logoA} style={styles.teamLogo} />
+        ) : (
+          <div style={styles.teamLogoPlaceholder}>—</div>
+        )}
+
+        {/* TEAM A */}
+        <span style={styles.teamName}>{getTeamName(match.a)}</span>
+
+        {/* VS */}
         <span style={styles.vs}>VS</span>
-        <span style={styles.team}>{getTeamName(match.b)}</span>
+
+        {/* TEAM B */}
+        <span style={styles.teamName}>{getTeamName(match.b)}</span>
+
+        {/* LOGO B */}
+        {logoB ? (
+          <img src={logoB} style={styles.teamLogo} />
+        ) : (
+          <div style={styles.teamLogoPlaceholder}>—</div>
+        )}
       </div>
 
       {match.winner && (
@@ -148,9 +167,7 @@ function BracketMatch({ match, getTeamName }) {
   );
 }
 
-/* -------------------------------------------------- */
-/* --------------------- ESTILOS --------------------- */
-/* -------------------------------------------------- */
+/* ------------------ ESTILOS ------------------ */
 
 const styles = {
   root: {
@@ -158,74 +175,53 @@ const styles = {
     minHeight: "100vh",
     background:
       "radial-gradient(circle at 50% -40vh, #262626 0, #0b0b0b 45%, #000 100%)",
-    padding: "30px 20px 40px",
+    padding: "40px 20px",
     boxSizing: "border-box",
     color: "white",
-    display: "flex",
-    justifyContent: "center",
+    textAlign: "center",
   },
 
-  container: {
-    width: "100%",
-    maxWidth: "980px",
-    margin: "0 auto",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "26px",
-  },
-
-  /* HEADER PREMIUM */
-  header: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "10px",
-    marginBottom: "10px",
-  },
-
-  headerLogo: {
-    height: "72px",
+  logo: {
+    height: "80px",
     objectFit: "contain",
+    marginBottom: "10px",
     filter:
-      "drop-shadow(0 0 6px rgba(255,255,255,0.25)) drop-shadow(0 0 16px rgba(255,255,255,0.18))",
+      "drop-shadow(0 0 6px rgba(255,255,255,0.25)) drop-shadow(0 0 20px rgba(255,255,255,0.18))",
   },
 
-  headerTitle: {
-    fontSize: "20px",
-    fontWeight: 800,
-    letterSpacing: "0.16em",
+  title: {
+    fontSize: "30px",
+    fontWeight: 900,
+    marginBottom: "40px",
+    letterSpacing: "0.15em",
     color: "#ffffffff",
-    textTransform: "uppercase",
-    textShadow: "0 0 16px rgba(255, 255, 255, 0.4)",
+    textShadow: "0 0 18px rgba(255, 255, 255, 0.35)",
   },
 
   columnsWrapper: {
-    width: "100%",
     display: "flex",
     justifyContent: "center",
-    gap: "22px",
+    gap: "24px",
     flexWrap: "wrap",
   },
 
   column: {
-    minWidth: "190px",
+    minWidth: "200px",
     background: "rgba(255,255,255,0.05)",
-    padding: "16px 16px 18px",
+    padding: "18px",
     borderRadius: "16px",
     border: "1px solid rgba(255,255,255,0.10)",
-    backdropFilter: "blur(7px)",
-    boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
+    backdropFilter: "blur(6px)",
+    boxShadow: "0 6px 18px rgba(0,0,0,0.5)",
   },
 
   columnTitle: {
     textAlign: "center",
-    fontWeight: 700,
-    fontSize: "15px",
+    fontWeight: 800,
+    fontSize: "17px",
     color: "#ffebee",
     marginBottom: "14px",
-    letterSpacing: "0.08em",
-    textTransform: "uppercase",
+    letterSpacing: "0.05em",
   },
 
   matchList: {
@@ -235,70 +231,80 @@ const styles = {
   },
 
   matchCard: {
-    padding: "14px 12px",
+    padding: "14px",
     borderRadius: "12px",
     background: "rgba(255,255,255,0.10)",
-    border: "1px solid rgba(255,255,255,0.16)",
+    border: "1px solid rgba(255,255,255,0.15)",
     backdropFilter: "blur(8px)",
   },
 
-  matchRow: {
-    display: "flex",
-    justifyContent: "space-between",
+  matchRowWithLogos: {
+    display: "grid",
+    gridTemplateColumns: "40px 1fr 40px 1fr 40px",
+    alignItems: "center",
+    gap: "10px",
     fontSize: "13px",
     fontWeight: 600,
-    gap: "6px",
+    color: "white",
   },
 
-  team: {
-    flex: 1,
+  teamLogo: {
+    width: "34px",
+    height: "34px",
+    borderRadius: "6px",
+    objectFit: "contain",
+    background: "rgba(255,255,255,0.10)",
+    padding: "4px",
+  },
+
+  teamLogoPlaceholder: {
+    width: "34px",
+    height: "34px",
+    borderRadius: "6px",
+    background: "rgba(255,255,255,0.10)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    opacity: 0.6,
+  },
+
+  teamName: {
     textAlign: "center",
-    lineHeight: 1.25,
+    flex: 1,
   },
 
   vs: {
     width: "40px",
     textAlign: "center",
-    color: "rgba(255,255,255,0.65)",
-    fontSize: "11px",
-    fontWeight: 700,
-    letterSpacing: "0.08em",
+    color: "rgba(255,255,255,0.6)",
   },
 
   winner: {
     marginTop: "8px",
     fontSize: "12px",
     color: "#ffebee",
-    textAlign: "center",
-    opacity: 0.9,
   },
 
   championBox: {
-    marginTop: "26px",
-    padding: "20px 22px",
-    borderRadius: "20px",
-    background:
-      "linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.10))",
-    border: "1px solid rgba(255,255,255,0.35)",
+    marginTop: "40px",
+    padding: "20px",
+    borderRadius: "18px",
+    background: "rgba(255,255,255,0.15)",
+    border: "1px solid rgba(255,255,255,0.25)",
     textAlign: "center",
-    boxShadow: "0 14px 32px rgba(0,0,0,0.75)",
-    minWidth: "260px",
+    boxShadow: "0 10px 24px rgba(0,0,0,0.65)",
   },
 
   championTitle: {
     fontSize: "18px",
-    marginBottom: "10px",
-    color: "#2b2b2b",
-    fontWeight: 800,
-    letterSpacing: "0.08em",
+    marginBottom: "8px",
+    color: "#ffebee",
   },
 
   championTeam: {
     fontSize: "22px",
     fontWeight: 900,
-    letterSpacing: "0.10em",
-    color: "#111",
-    textTransform: "uppercase",
+    letterSpacing: "0.06em",
   },
 
   loadingRoot: {
@@ -307,13 +313,10 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background:
-      "radial-gradient(circle at 50% -40vh, #262626 0, #0b0b0b 45%, #000 100%)",
-    color: "white",
   },
 
   loading: {
     fontSize: "18px",
-    opacity: 0.85,
+    opacity: 0.8,
   },
 };
