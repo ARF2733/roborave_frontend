@@ -6,25 +6,15 @@ export default function JudgeDashboard() {
   const navigate = useNavigate();
 
   const [teams, setTeams] = useState(fallbackTeams);
+  const [filteredCategory, setFilteredCategory] = useState("ALL");
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [score, setScore] = useState("");
 
-  // --------------------------------------------------
-  // FILTRO DE CATEGORÍAS
-  // --------------------------------------------------
-  const categories = ["ALL", ...new Set(fallbackTeams.map(t => t.category))];
-
-  const [activeCategory, setActiveCategory] = useState("ALL");
-
-  const categoryCount = (cat) => {
-    if (cat === "ALL") return teams.length;
-    return teams.filter((t) => t.category === cat).length;
-  };
-
-  const filteredTeams =
-    activeCategory === "ALL"
-      ? teams
-      : teams.filter((t) => t.category === activeCategory);
+  // Extraer categorías únicas
+  const categories = [
+    "ALL",
+    ...Array.from(new Set(fallbackTeams.map((t) => t.category))),
+  ];
 
   // --------------------------------------------------
   // BLOQUEO DE RUTA SIN TOKEN
@@ -36,6 +26,14 @@ export default function JudgeDashboard() {
       navigate("/judge");
     }
   }, []);
+
+  // --------------------------------------------------
+  // FILTRAR EQUIPOS
+  // --------------------------------------------------
+  const filteredTeams =
+    filteredCategory === "ALL"
+      ? teams
+      : teams.filter((t) => t.category === filteredCategory);
 
   // --------------------------------------------------
   // ABRIR MODAL
@@ -87,23 +85,40 @@ export default function JudgeDashboard() {
       <div style={styles.container}>
         <h1 style={styles.title}>Panel de Jueces</h1>
 
-        {/* ---------------------- FILTROS ---------------------- */}
-        <div style={styles.filterBar}>
-          {categories.map((cat) => (
-            <div
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              style={{
-                ...styles.filterChip,
-                ...(activeCategory === cat ? styles.filterChipActive : {}),
-              }}
-            >
-              {cat === "ALL" ? "Todos" : cat} ({categoryCount(cat)})
-            </div>
-          ))}
+        {/* FILTRO DE CATEGORÍAS */}
+        <div style={styles.filterWrapper}>
+          {/* Fade izquierda */}
+          <div style={styles.fadeLeft} />
+
+          <div style={styles.filterBar}>
+            {categories.map((cat) => (
+              <div
+                key={cat}
+                onClick={() => setFilteredCategory(cat)}
+                style={{
+                  ...styles.filterChip,
+                  background:
+                    filteredCategory === cat
+                      ? "rgba(255,255,255,0.22)"
+                      : "rgba(255,255,255,0.08)",
+                  border:
+                    filteredCategory === cat
+                      ? "1px solid rgba(255,255,255,0.35)"
+                      : "1px solid rgba(255,255,255,0.16)",
+                }}
+              >
+                {cat}{" "}
+                {cat !== "ALL" &&
+                  `(${teams.filter((t) => t.category === cat).length})`}
+              </div>
+            ))}
+          </div>
+
+          {/* Fade derecha */}
+          <div style={styles.fadeRight} />
         </div>
 
-        {/* ---------------------- LISTA DE EQUIPOS ---------------------- */}
+        {/* GRID PREMIUM */}
         <div style={styles.grid}>
           {filteredTeams.map((team) => (
             <div
@@ -119,7 +134,7 @@ export default function JudgeDashboard() {
         </div>
       </div>
 
-      {/* ---------------------- MODAL PREMIUM ---------------------- */}
+      {/* MODAL PREMIUM */}
       {selectedTeam && (
         <div style={styles.modalBackdrop}>
           <div style={styles.modal}>
@@ -181,16 +196,25 @@ const styles = {
     letterSpacing: "0.12em",
     color: "#ffebee",
     textAlign: "center",
-    marginBottom: "10px",
+    marginBottom: "6px",
   },
 
-  /* ------------------------- FILTROS ------------------------- */
+  /* Filtro */
+  filterWrapper: {
+    position: "relative",
+    width: "100%",
+    marginTop: "-4px",
+    marginBottom: "6px",
+  },
 
   filterBar: {
     display: "flex",
     gap: "10px",
     overflowX: "auto",
-    paddingBottom: "6px",
+    padding: "8px 0",
+    paddingTop: "6px",
+    scrollSnapType: "x mandatory",
+    WebkitOverflowScrolling: "touch",
   },
 
   filterChip: {
@@ -203,15 +227,32 @@ const styles = {
     whiteSpace: "nowrap",
     cursor: "pointer",
     transition: "0.2s ease",
+    scrollSnapAlign: "start",
   },
 
-  filterChipActive: {
-    background: "rgba(255,255,255,0.22)",
-    border: "1px solid rgba(255,255,255,0.35)",
-    fontWeight: 700,
+  fadeLeft: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "30px",
+    height: "100%",
+    background:
+      "linear-gradient(to right, rgba(0,0,0,0.85), rgba(0,0,0,0))",
+    pointerEvents: "none",
+    zIndex: 5,
   },
 
-  /* ------------------------- GRID ------------------------- */
+  fadeRight: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: "30px",
+    height: "100%",
+    background:
+      "linear-gradient(to left, rgba(0,0,0,0.85), rgba(0,0,0,0))",
+    pointerEvents: "none",
+    zIndex: 5,
+  },
 
   grid: {
     display: "flex",
@@ -227,16 +268,14 @@ const styles = {
     padding: "18px 20px",
     cursor: "pointer",
     transition: "0.22s ease",
-
     display: "flex",
-    flexDirection: "column", // mobile-first
-    alignItems: "flex-start",
-    gap: "6px",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 
   teamName: {
     color: "white",
-    fontSize: "16px",
+    fontSize: "17px",
     fontWeight: 700,
   },
 
@@ -245,8 +284,7 @@ const styles = {
     fontSize: "13px",
   },
 
-  /* ------------------------- MODAL ------------------------- */
-
+  /* Modal */
   modalBackdrop: {
     position: "fixed",
     top: 0,
@@ -311,3 +349,4 @@ const styles = {
     fontWeight: 600,
   },
 };
+  
