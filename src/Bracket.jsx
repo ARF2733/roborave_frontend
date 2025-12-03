@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
+import { fallbackTeams } from "./fallbackTeams";
 
 export default function Bracket() {
   const [bracket, setBracket] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // 🔥 Convertir id -> nombre real
+  function getTeamName(id) {
+    if (!id) return "—";
+    const t = fallbackTeams.find((x) => x.id === id);
+    return t ? t.name : `Equipo ${id}`;
+  }
 
   // Cargar bracket cada 2 segundos
   useEffect(() => {
@@ -45,29 +53,47 @@ export default function Bracket() {
 
         {/* ROUND OF 16 */}
         {bracket.round16.length > 0 && (
-          <BracketColumn title="Octavos de Final" matches={bracket.round16} />
+          <BracketColumn
+            title="Octavos de Final"
+            matches={bracket.round16}
+            getTeamName={getTeamName}
+          />
         )}
 
         {/* QUARTER FINALS */}
         {bracket.quarter.length > 0 && (
-          <BracketColumn title="Cuartos de Final" matches={bracket.quarter} />
+          <BracketColumn
+            title="Cuartos de Final"
+            matches={bracket.quarter}
+            getTeamName={getTeamName}
+          />
         )}
 
         {/* SEMIS */}
         {bracket.semi.length > 0 && (
-          <BracketColumn title="Semifinales" matches={bracket.semi} />
+          <BracketColumn
+            title="Semifinales"
+            matches={bracket.semi}
+            getTeamName={getTeamName}
+          />
         )}
 
         {/* FINAL */}
         {bracket.final.length > 0 && (
-          <BracketColumn title="Final" matches={bracket.final} />
+          <BracketColumn
+            title="Final"
+            matches={bracket.final}
+            getTeamName={getTeamName}
+          />
         )}
 
         {/* CHAMPION */}
         {bracket.champion && (
           <div style={styles.championBox}>
             <div style={styles.championTitle}>🏆 CAMPEÓN</div>
-            <div style={styles.championTeam}>Equipo #{bracket.champion}</div>
+            <div style={styles.championTeam}>
+              {getTeamName(bracket.champion)}
+            </div>
           </div>
         )}
       </div>
@@ -79,14 +105,14 @@ export default function Bracket() {
 /* ------------------- COLUMNAS ---------------------- */
 /* -------------------------------------------------- */
 
-function BracketColumn({ title, matches }) {
+function BracketColumn({ title, matches, getTeamName }) {
   return (
     <div style={styles.column}>
       <h2 style={styles.columnTitle}>{title}</h2>
 
       <div style={styles.matchList}>
         {matches.map((m) => (
-          <BracketMatch key={m.id} match={m} />
+          <BracketMatch key={m.id} match={m} getTeamName={getTeamName} />
         ))}
       </div>
     </div>
@@ -97,24 +123,24 @@ function BracketColumn({ title, matches }) {
 /* ------------------ MATCH CARD --------------------- */
 /* -------------------------------------------------- */
 
-function BracketMatch({ match }) {
+function BracketMatch({ match, getTeamName }) {
   return (
     <div style={styles.matchCard} className="score-card">
       <div style={styles.matchRow}>
         <span style={styles.team}>
-          {match.a ? `Equipo ${match.a}` : "—"}
+          {getTeamName(match.a)}
         </span>
 
         <span style={styles.vs}>VS</span>
 
         <span style={styles.team}>
-          {match.b ? `Equipo ${match.b}` : "—"}
+          {getTeamName(match.b)}
         </span>
       </div>
 
       {match.winner && (
         <div style={styles.winner}>
-          Ganador: <strong>Equipo {match.winner}</strong>
+          Ganador: <strong>{getTeamName(match.winner)}</strong>
         </div>
       )}
     </div>
