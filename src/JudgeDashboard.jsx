@@ -116,7 +116,7 @@ export default function JudgeDashboard() {
       }
 
       alert(`Bracket generado para ${filteredCategory}`);
-      navigate("/bracket");
+      navigate("/finals");
     } catch (err) {
       alert("Error de conexión");
     }

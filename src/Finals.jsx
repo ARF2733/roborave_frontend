@@ -210,23 +210,27 @@ function FinalsMatch({
   const A = getTeam(match.a);
   const B = getTeam(match.b);
 
-  async function setWinner(winnerId) {
-    if (!winnerId) return;
+async function setWinner(winnerId) {
+  if (!winnerId) return;
 
-    await fetch("https://roborave.onrender.com/api/bracket/set-winner", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: token,
-      },
-      body: JSON.stringify({
-        category: selectedCat,
-        round,
-        matchId: match.id,
-        winner: winnerId,
-      }),
-    });
-  }
+  const r = await fetch("https://roborave.onrender.com/api/bracket/set-winner", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: token,
+    },
+    body: JSON.stringify({
+      category: selectedCat,
+      round,
+      matchId: match.id,
+      winner: winnerId,
+    }),
+  });
+
+  const json = await r.json();
+  console.log("SERVER RESPONSE:", json);
+}
+
 
   const buttonStyle = (isWinner) => ({
     padding: "8px 14px",
@@ -337,6 +341,7 @@ function FinalsMatch({
     </div>
   );
 }
+
 
 
 /* ---------------------------------------------------------- */
