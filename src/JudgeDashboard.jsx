@@ -80,16 +80,53 @@ export default function JudgeDashboard() {
     setScore("");
   };
 
+  // --------------------------------------------------
+  // GENERAR BRACKET
+  // --------------------------------------------------
+  const generateBracket = async () => {
+    const token = localStorage.getItem("judgeToken");
+    if (!token) {
+      alert("No autorizado");
+      return;
+    }
+
+    try {
+      const r = await fetch("https://roborave.onrender.com/api/bracket/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        }
+      });
+
+      const json = await r.json();
+
+      if (!json.ok) {
+        alert(json.error || "Error generando bracket");
+        return;
+      }
+
+      alert("Bracket generado con éxito");
+      navigate("/bracket");
+
+    } catch (err) {
+      alert("Error de conexión");
+    }
+  };
+
   return (
     <div style={styles.root}>
       <div style={styles.container}>
         <h1 style={styles.title}>Panel de Jueces</h1>
 
+        {/* BOTÓN PREMIUM PARA BRACKET */}
+        <button onClick={generateBracket} style={styles.bracketButton}>
+          Generar Bracket Eliminatorio
+        </button>
+
         {/* FILTRO DE CATEGORÍAS */}
         <div style={styles.filterWrapper}>
-          {/* Fade izquierda */}
           <div style={styles.fadeLeft} />
-
           <div style={styles.filterBar}>
             {categories.map((cat) => (
               <div
@@ -113,8 +150,6 @@ export default function JudgeDashboard() {
               </div>
             ))}
           </div>
-
-          {/* Fade derecha */}
           <div style={styles.fadeRight} />
         </div>
 
@@ -196,15 +231,26 @@ const styles = {
     letterSpacing: "0.12em",
     color: "#ffebee",
     textAlign: "center",
-    marginBottom: "6px",
+  },
+
+  // 🔥 BOTÓN BRACKET
+  bracketButton: {
+    background: "linear-gradient(90deg, #ff4d4d, #ff1a1a)",
+    padding: "14px",
+    borderRadius: "14px",
+    border: "1px solid rgba(255,255,255,0.25)",
+    color: "white",
+    fontWeight: 700,
+    fontSize: "16px",
+    cursor: "pointer",
+    textAlign: "center",
+    letterSpacing: "0.05em",
+    boxShadow: "0 4px 15px rgba(255,0,0,0.25)",
   },
 
   /* Filtro */
   filterWrapper: {
     position: "relative",
-    width: "100%",
-    marginTop: "-4px",
-    marginBottom: "6px",
   },
 
   filterBar: {
@@ -213,21 +259,14 @@ const styles = {
     overflowX: "auto",
     padding: "8px 0",
     paddingTop: "6px",
-    scrollSnapType: "x mandatory",
-    WebkitOverflowScrolling: "touch",
   },
 
   filterChip: {
     padding: "8px 14px",
-    background: "rgba(255,255,255,0.10)",
     borderRadius: "12px",
-    border: "1px solid rgba(255,255,255,0.16)",
     color: "white",
-    fontSize: "13px",
-    whiteSpace: "nowrap",
     cursor: "pointer",
-    transition: "0.2s ease",
-    scrollSnapAlign: "start",
+    fontSize: "13px",
   },
 
   fadeLeft: {
@@ -239,7 +278,6 @@ const styles = {
     background:
       "linear-gradient(to right, rgba(0,0,0,0.85), rgba(0,0,0,0))",
     pointerEvents: "none",
-    zIndex: 5,
   },
 
   fadeRight: {
@@ -251,7 +289,6 @@ const styles = {
     background:
       "linear-gradient(to left, rgba(0,0,0,0.85), rgba(0,0,0,0))",
     pointerEvents: "none",
-    zIndex: 5,
   },
 
   grid: {
@@ -262,15 +299,10 @@ const styles = {
 
   teamCard: {
     background: "rgba(255,255,255,0.10)",
-    border: "1px solid rgba(255,255,255,0.15)",
-    backdropFilter: "blur(8px)",
     borderRadius: "14px",
     padding: "18px 20px",
+    border: "1px solid rgba(255,255,255,0.15)",
     cursor: "pointer",
-    transition: "0.22s ease",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
   },
 
   teamName: {
@@ -284,7 +316,6 @@ const styles = {
     fontSize: "13px",
   },
 
-  /* Modal */
   modalBackdrop: {
     position: "fixed",
     top: 0,
@@ -295,21 +326,17 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
   },
 
   modal: {
     width: "100%",
     maxWidth: "420px",
     background: "rgba(20,20,20,0.9)",
-    border: "1px solid rgba(255,255,255,0.18)",
     borderRadius: "18px",
     padding: "28px",
-    backdropFilter: "blur(10px)",
     display: "flex",
     flexDirection: "column",
     gap: "18px",
-    animation: "fadeIn 0.25s ease",
   },
 
   modalTitle: {
@@ -326,7 +353,6 @@ const styles = {
     border: "1px solid rgba(255,255,255,0.25)",
     color: "white",
     fontSize: "17px",
-    outline: "none",
   },
 
   buttonPrimary: {
