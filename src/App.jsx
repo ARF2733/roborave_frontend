@@ -5,9 +5,9 @@ import FullscreenRoboRAVE from "./FullscreenRoboRAVE";
 import LiveHeatsByCategory from "./LiveHeatsByCategory";
 import Judge from "./Judge";
 import JudgeDashboard from "./JudgeDashboard";
-import Sponsor from "./Sponsor";
+
 import { fallbackTeams } from "./fallbackTeams";
-import LiveScoresContainer from "./LiveScoresContainer"; // ⭐ NUEVO
+import LiveScoresContainer from "./LiveScoresContainer";
 
 export default function App() {
   return (
@@ -38,12 +38,8 @@ export default function App() {
         />
 
         <Route path="/judge/dashboard" element={<JudgeDashboard />} />
+        
 
-        {/* SPONSORS */}
-        <Route 
-          path="/sponsor" 
-          element={<Sponsor />} 
-        />
 
       </Routes>
 

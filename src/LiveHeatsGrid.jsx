@@ -3,9 +3,9 @@ export default function LiveHeatsGrid({ teams }) {
   return (
     <div style={styles.grid}>
       {teams.map((t, index) => (
-        <div key={t.id} style={styles.card}>
-
-          {/* MEDALLAS TOP 3 (sin glow) */}
+        <div key={t.id} style={styles.card} className="score-card">
+          
+          {/* MEDALLAS TOP 3 */}
           {index < 3 && (
             <span style={styles.medal}>
               {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
@@ -35,7 +35,6 @@ export default function LiveHeatsGrid({ teams }) {
 
           {/* SCORE */}
           <div style={styles.score}>{t.score}</div>
-
         </div>
       ))}
     </div>
@@ -46,43 +45,47 @@ const styles = {
   grid: {
     display: "flex",
     flexDirection: "column",
-    gap: "14px",
+    gap: "16px",
     width: "100%",
   },
 
   card: {
     position: "relative",
-    background: "rgba(255, 255, 255, 0.18)",
-    borderRadius: "12px",
-    padding: "14px 16px",
+
+    background:
+      "linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05))",
+
+    borderRadius: "16px",
+    padding: "18px 20px",
 
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: "12px",
+    gap: "18px",
 
-    border: "1px solid rgba(255,255,255,0.22)",
-    backdropFilter: "blur(6px)",
-    WebkitBackdropFilter: "blur(6px)",
+    border: "1px solid rgba(255,255,255,0.20)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
 
-    boxShadow: "0 3px 10px rgba(0,0,0,0.35)",
-    transition: "transform 0.15s ease",
+    boxShadow:
+      "0 8px 22px rgba(0,0,0,0.55), inset 0 1px 3px rgba(255,255,255,0.15)",
+
+    transition: "all 0.22s ease",
+    cursor: "default",
   },
 
   medal: {
     position: "absolute",
-    top: "-12px",
-    left: "-12px",
-    fontSize: "28px",
-    animation: "medalPop 0.35s ease-out",
+    top: "-14px",
+    left: "-14px",
+    fontSize: "30px",
   },
 
   logo: {
-    width: "75px",
-    height: "75px",
-    borderRadius: "6px",
+    width: "70px",
+    height: "70px",
+    borderRadius: "8px",
     objectFit: "contain",
-    flexShrink: 0,
   },
 
   info: {
@@ -93,8 +96,8 @@ const styles = {
   },
 
   name: {
-    fontSize: "15px",
-    fontWeight: 600,
+    fontSize: "17px",
+    fontWeight: 700,
     color: "white",
     lineHeight: 1.25,
     display: "-webkit-box",
@@ -106,42 +109,33 @@ const styles = {
   meta: {
     display: "flex",
     alignItems: "center",
-    gap: "6px",
-    marginTop: "4px",
+    gap: "8px",
+    marginTop: "6px",
     opacity: 0.85,
   },
 
   flag: {
-    width: "20px",
-    height: "13px",
+    width: "22px",
+    height: "14px",
     borderRadius: "3px",
     objectFit: "cover",
-    flexShrink: 0,
+  
   },
 
   country: {
     fontSize: "12px",
-    letterSpacing: "0.04em",
+    letterSpacing: "0.05em",
     color: "white",
   },
 
   score: {
-    fontSize: "24px",
+    fontSize: "26px",
     fontWeight: 800,
-    color: "white",
-    marginLeft: "10px",
-    minWidth: "32px",
+    color: "#ffebee",
+    minWidth: "40px",
     textAlign: "right",
-    flexShrink: 0,
-  },
-};
 
-/* ------------------------------------------- */
-/* -------- ANIMACIÓN GLOBAL (CSS) ----------- */
-/* ------------------------------------------- */
-/*
-  @keyframes medalPop {
-    0% { transform: scale(0.4); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-*/
+  },
+
+
+};
