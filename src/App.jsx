@@ -6,7 +6,8 @@ import LiveHeatsByCategory from "./LiveHeatsByCategory";
 import Judge from "./Judge";
 import JudgeDashboard from "./JudgeDashboard";
 import RoboRaveTV from "./RoboRaveTV";
-import Bracket from "./Bracket";
+import Finals from "./Finals";
+
 
 import { fallbackTeams } from "./fallbackTeams";
 import LiveScoresContainer from "./LiveScoresContainer";
@@ -42,7 +43,9 @@ export default function App() {
         <Route path="/judge/dashboard" element={<JudgeDashboard />} />
         
         <Route path="/tv" element={<RoboRaveTV />} />
-        <Route path="/bracket" element={<Bracket />} />
+        <Route path="/finals" element={<Finals />} />
+
+
 
 
 

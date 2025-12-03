@@ -47,6 +47,18 @@ export default function Home() {
           </a>
 
           <a
+            href="/finals"
+            style={{
+              ...styles.button,
+              ...(hover === "finals" ? styles.buttonHover : {}),
+            }}
+            onMouseEnter={() => setHover("finals")}
+            onMouseLeave={() => setHover(null)}
+          >
+            RoboRAVE Finals
+          </a>
+
+          <a
             href="/judge"
             style={{
               ...styles.button,

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fallbackTeams } from "./fallbackTeams";
 
-export default function Bracket() {
+export default function Finals() {
   const [bracket, setBracket] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -33,7 +33,7 @@ export default function Bracket() {
   if (loading) {
     return (
       <div style={styles.loadingRoot}>
-        <div style={styles.loading}>Cargando bracket…</div>
+        <div style={styles.loading}>Cargando Finals…</div>
       </div>
     );
   }
@@ -49,7 +49,7 @@ export default function Bracket() {
   return (
     <div style={styles.root}>
       <div style={styles.container}>
-        <h1 style={styles.title}>BRACKET ELIMINATORIO</h1>
+        <h1 style={styles.title}>ROBORAVE FINALS</h1>
 
         {/* ROUND OF 16 */}
         {bracket.round16.length > 0 && (
