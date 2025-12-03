@@ -1,107 +1,73 @@
 import { useEffect, useState } from "react";
 
 export default function Bracket() {
-  const [category, setCategory] = useState("SUMO1K_HS"); // categoría inicial
   const [bracket, setBracket] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // --- Cargar bracket de la API ---
-  const loadBracket = async () => {
-    setLoading(true);
-    const r = await fetch(`https://roborave.onrender.com/api/bracket?category=${category}`);
-    const json = await r.json();
-    setBracket(json);
-    setLoading(false);
-  };
-
-  // cargar al arrancar
+  // Cargar bracket cada 2 segundos
   useEffect(() => {
-    loadBracket();
-  }, [category]);
+    const load = async () => {
+      try {
+        const r = await fetch("https://roborave.onrender.com/api/bracket");
+        const json = await r.json();
+        setBracket(json);
+        setLoading(false);
+      } catch {
+        setLoading(false);
+      }
+    };
 
-  // --- Generar TOP 16 desde backend ---
-  const generate = async () => {
-    const token = localStorage.getItem("judgeToken");
-    if (!token) {
-      alert("No autorizado");
-      return;
-    }
+    load();
+    const itv = setInterval(load, 2000);
+    return () => clearInterval(itv);
+  }, []);
 
-    const r = await fetch("https://roborave.onrender.com/api/bracket/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": token
-      },
-      body: JSON.stringify({ category })
-    });
-
-    const json = await r.json();
-    if (!json.ok) return alert(json.error || "Error generando bracket");
-
-    setBracket(json.bracket);
-  };
+  if (loading) {
+    return (
+      <div style={styles.loadingRoot}>
+        <div style={styles.loading}>Cargando bracket…</div>
+      </div>
+    );
+  }
 
   if (!bracket) {
     return (
-      <div style={{ padding: 20, color: "white" }}>
-        Cargando...
+      <div style={styles.loadingRoot}>
+        <div style={styles.loading}>Sin datos</div>
       </div>
     );
   }
 
   return (
     <div style={styles.root}>
-      <h1 style={styles.title}>Bracket — {category}</h1>
+      <div style={styles.container}>
+        <h1 style={styles.title}>BRACKET ELIMINATORIO</h1>
 
-      {/* SELECTOR DE CATEGORÍA */}
-      <select
-        style={styles.selector}
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-      >
-        <option value="SUMO1K_HS">Sumo 1 Kg HS</option>
-        <option value="SUMO_ES">Sumo ES</option>
-        <option value="A-MAZE-ING_ES">a-MAZE-ing ES</option>
-        <option value="SOCCER_ES">Soccer ES</option>
-      </select>
+        {/* ROUND OF 16 */}
+        {bracket.round16.length > 0 && (
+          <BracketColumn title="Octavos de Final" matches={bracket.round16} />
+        )}
 
-      {/* BOTÓN GENERAR */}
-      <button style={styles.generateBtn} onClick={generate}>
-        Generar Top 16
-      </button>
+        {/* QUARTER FINALS */}
+        {bracket.quarter.length > 0 && (
+          <BracketColumn title="Cuartos de Final" matches={bracket.quarter} />
+        )}
 
-      {/* BRACKET MOBILE FIRST */}
-      <div style={styles.column}>
-        <h2 style={styles.round}>Round of 16</h2>
-        {bracket.round16.map(m => (
-          <Match key={m.id} match={m} />
-        ))}
-      </div>
+        {/* SEMIS */}
+        {bracket.semi.length > 0 && (
+          <BracketColumn title="Semifinales" matches={bracket.semi} />
+        )}
 
-      <div style={styles.column}>
-        <h2 style={styles.round}>Quarter Finals</h2>
-        {bracket.quarter.map(m => (
-          <Match key={m.id} match={m} />
-        ))}
-      </div>
+        {/* FINAL */}
+        {bracket.final.length > 0 && (
+          <BracketColumn title="Final" matches={bracket.final} />
+        )}
 
-      <div style={styles.column}>
-        <h2 style={styles.round}>Semi Finals</h2>
-        {bracket.semi.map(m => (
-          <Match key={m.id} match={m} />
-        ))}
-      </div>
-
-      <div style={styles.column}>
-        <h2 style={styles.round}>Final</h2>
-        {bracket.final.map(m => (
-          <Match key={m.id} match={m} />
-        ))}
-
+        {/* CHAMPION */}
         {bracket.champion && (
           <div style={styles.championBox}>
-            🏆 Campeón: Equipo {bracket.champion}
+            <div style={styles.championTitle}>🏆 CAMPEÓN</div>
+            <div style={styles.championTeam}>Equipo #{bracket.champion}</div>
           </div>
         )}
       </div>
@@ -109,80 +75,174 @@ export default function Bracket() {
   );
 }
 
-/* COMPONENTE MATCH */
-function Match({ match }) {
+/* -------------------------------------------------- */
+/* ------------------- COLUMNAS ---------------------- */
+/* -------------------------------------------------- */
+
+function BracketColumn({ title, matches }) {
   return (
-    <div style={styles.match}>
-      <div style={styles.team}>Equipo {match.a ?? "?"}</div>
-      <div style={styles.vs}>vs</div>
-      <div style={styles.team}>Equipo {match.b ?? "?"}</div>
-      {match.winner && <div style={styles.winner}>Ganador: {match.winner}</div>}
+    <div style={styles.column}>
+      <h2 style={styles.columnTitle}>{title}</h2>
+
+      <div style={styles.matchList}>
+        {matches.map((m) => (
+          <BracketMatch key={m.id} match={m} />
+        ))}
+      </div>
     </div>
   );
 }
 
-/* ESTILOS */
+/* -------------------------------------------------- */
+/* ------------------ MATCH CARD --------------------- */
+/* -------------------------------------------------- */
+
+function BracketMatch({ match }) {
+  return (
+    <div style={styles.matchCard} className="score-card">
+      <div style={styles.matchRow}>
+        <span style={styles.team}>
+          {match.a ? `Equipo ${match.a}` : "—"}
+        </span>
+
+        <span style={styles.vs}>VS</span>
+
+        <span style={styles.team}>
+          {match.b ? `Equipo ${match.b}` : "—"}
+        </span>
+      </div>
+
+      {match.winner && (
+        <div style={styles.winner}>
+          Ganador: <strong>Equipo {match.winner}</strong>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* -------------------------------------------------- */
+/* --------------------- ESTILOS --------------------- */
+/* -------------------------------------------------- */
+
 const styles = {
   root: {
-    padding: 20,
-    color: "white",
-    display: "flex",
-    flexDirection: "column",
-    gap: 24,
+    width: "100vw",
+    minHeight: "100vh",
     background:
       "radial-gradient(circle at 50% -40vh, #262626 0, #0b0b0b 45%, #000 100%)",
-    minHeight: "100vh"
+    padding: 20,
+    boxSizing: "border-box",
+    display: "flex",
+    justifyContent: "center",
   },
+
+  container: {
+    width: "100%",
+    maxWidth: "600px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "28px",
+  },
+
   title: {
-    fontSize: 26,
-    fontWeight: 800,
-    textAlign: "center"
-  },
-  selector: {
-    padding: 12,
-    borderRadius: 8,
-    fontSize: 16,
-    background: "rgba(255,255,255,0.1)",
-    color: "white",
-    border: "1px solid rgba(255,255,255,0.2)"
-  },
-  generateBtn: {
-    padding: 14,
-    borderRadius: 10,
-    background: "rgba(255,255,255,0.15)",
-    color: "white",
-    fontSize: 16,
-    border: "1px solid rgba(255,255,255,0.25)"
-  },
-  column: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 12
-  },
-  round: {
-    fontSize: 20,
-    fontWeight: 700,
-    marginBottom: 8
-  },
-  match: {
-    background: "rgba(255,255,255,0.08)",
-    border: "1px solid rgba(255,255,255,0.2)",
-    padding: 14,
-    borderRadius: 10,
-    display: "flex",
-    flexDirection: "column",
-    gap: 8
-  },
-  team: { color: "white", fontSize: 14 },
-  vs: { textAlign: "center", opacity: 0.7 },
-  winner: { marginTop: 4, opacity: 0.85, fontSize: 13 },
-  championBox: {
-    marginTop: 16,
-    padding: 16,
     textAlign: "center",
-    background: "rgba(255,215,0,0.2)",
-    borderRadius: 12,
-    fontSize: 18,
-    fontWeight: "bold"
-  }
+    color: "white",
+    fontSize: "26px",
+    letterSpacing: "0.12em",
+    fontWeight: 800,
+    marginBottom: "10px",
+  },
+
+  column: {
+    background: "rgba(255,255,255,0.06)",
+    padding: "16px 18px",
+    borderRadius: "14px",
+    border: "1px solid rgba(255,255,255,0.12)",
+    backdropFilter: "blur(6px)",
+    boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+  },
+
+  columnTitle: {
+    color: "#ffebee",
+    fontSize: "18px",
+    marginBottom: "12px",
+    letterSpacing: "0.05em",
+    textAlign: "center",
+  },
+
+  matchList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+  },
+
+  matchCard: {
+    padding: "14px 16px",
+    background: "rgba(255,255,255,0.10)",
+    borderRadius: "12px",
+    border: "1px solid rgba(255,255,255,0.12)",
+    backdropFilter: "blur(6px)",
+  },
+
+  matchRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    color: "white",
+    fontWeight: 600,
+    fontSize: "14px",
+    marginBottom: "6px",
+  },
+
+  vs: {
+    color: "rgba(255,255,255,0.7)",
+    fontSize: "12px",
+  },
+
+  team: {
+    flex: 1,
+  },
+
+  winner: {
+    color: "#ffebee",
+    fontSize: "13px",
+    marginTop: "6px",
+  },
+
+  championBox: {
+    marginTop: "20px",
+    padding: "18px",
+    borderRadius: "16px",
+    background: "rgba(255,255,255,0.18)",
+    backdropFilter: "blur(8px)",
+    border: "1px solid rgba(255,255,255,0.22)",
+    textAlign: "center",
+  },
+
+  championTitle: {
+    fontSize: "16px",
+    color: "#ffebee",
+    marginBottom: "8px",
+    fontWeight: 700,
+  },
+
+  championTeam: {
+    fontSize: "20px",
+    color: "white",
+    fontWeight: 800,
+  },
+
+  loadingRoot: {
+    width: "100vw",
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    color: "white",
+  },
+
+  loading: {
+    fontSize: "18px",
+    opacity: 0.8,
+  },
 };
