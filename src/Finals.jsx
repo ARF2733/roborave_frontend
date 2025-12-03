@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { fallbackTeams } from "./fallbackTeams";
 
+/* ---------------------------------------------------- */
+/* ROOT COMPONENT */
+/* ---------------------------------------------------- */
+
 export default function Finals() {
   const [categories, setCategories] = useState({});
   const [selectedCat, setSelectedCat] = useState(null);
@@ -9,7 +13,6 @@ export default function Finals() {
   const token = localStorage.getItem("judgeToken") || "";
 
   function getTeam(id) {
-    
     return fallbackTeams.find((t) => t.id === id) || null;
   }
 
@@ -33,17 +36,14 @@ export default function Finals() {
     };
 
     load();
-    const iv = setInterval(load, 1500);
+    const iv = setInterval(load, 1200);
     return () => clearInterval(iv);
   }, [selectedCat]);
 
-  if (loading) {
-    return <Centered text="Cargando Finals…" />;
-  }
+  if (loading) return <Centered text="Cargando Finals…" />;
 
-  if (!Object.keys(categories).length) {
+  if (!Object.keys(categories).length)
     return <Centered text="Sin brackets generados" />;
-  }
 
   const current = categories[selectedCat];
 
@@ -73,10 +73,16 @@ export default function Finals() {
             token={token}
           />
 
-          {current.third && (
+          {/* ----------------- 3ER LUGAR ------------------ */}
+          {current.third && current.third[0] && (
             <div style={{ marginTop: 40 }}>
               <h2 style={styles.categoryTitle}>🥉 Tercer Lugar</h2>
-              <ThirdMatch data={current.third} getTeam={getTeam} />
+              <ThirdMatch
+                match={current.third[0]}
+                getTeam={getTeam}
+                selectedCat={selectedCat}
+                token={token}
+              />
             </div>
           )}
         </>
@@ -160,11 +166,26 @@ function FinalsCategory({ data, getTeam, selectedCat, token }) {
         )}
       </div>
 
+      {/* CAMPEÓN */}
       {data.champion && (
         <div style={styles.championBox}>
           <div style={styles.championTitle}>🏆 CAMPEÓN</div>
           <div style={styles.championTeam}>
             {getTeam(data.champion)?.name || "—"}
+          </div>
+        </div>
+      )}
+
+      {/* SUBCAMPEÓN (PERDEDOR DE LA FINAL) */}
+      {data.final?.[0]?.winner && (
+        <div style={{ marginTop: 15, opacity: 0.9 }}>
+          <div style={styles.categoryTitle}>🥈 Segundo Lugar</div>
+          <div style={styles.championTeam}>
+            {(() => {
+              const f = data.final[0];
+              const loser = f.a === f.winner ? f.b : f.a;
+              return getTeam(loser)?.name || "—";
+            })()}
           </div>
         </div>
       )}
@@ -206,7 +227,7 @@ function FinalsColumn({ title, label, matches, getTeam, selectedCat, token }) {
 }
 
 /* ---------------------------------------------------- */
-/* MATCH CON LOGO SELECCIONABLE Y GLOW */
+/* MATCH (logos clicables, glow premium) */
 /* ---------------------------------------------------- */
 
 function FinalsMatch({
@@ -219,7 +240,6 @@ function FinalsMatch({
 }) {
   const A = getTeam(match.a);
   const B = getTeam(match.b);
-
   const winner = match.winner;
 
   async function setWinner(winnerId) {
@@ -239,7 +259,6 @@ function FinalsMatch({
     });
   }
 
-  // ⭐ Glow mínimo, elegante y SOLO en logo ganador
   const logoGlow = (id) =>
     winner === id
       ? {
@@ -247,9 +266,7 @@ function FinalsMatch({
           border: "1px solid rgba(0,255,150,0.9)",
           transform: "scale(1.05)",
         }
-      : {
-          opacity: 0.65,
-        };
+      : { opacity: 0.6 };
 
   return (
     <div style={styles.matchCard}>
@@ -264,8 +281,8 @@ function FinalsMatch({
         {/* TEAM A */}
         <div style={{ textAlign: "center" }}>
           <img
-            src={`/logos/${A?.logo}`}
-            style={{ ...styles.teamLogo, ...logoGlow(A?.id) }}
+            src={A ? `/logos/${A.logo}` : ""}
+            style={{ ...styles.teamLogo, ...(A ? logoGlow(A.id) : {}) }}
             onClick={() => setWinner(A?.id)}
           />
           <div style={styles.teamName}>{A?.name || "—"}</div>
@@ -276,8 +293,8 @@ function FinalsMatch({
         {/* TEAM B */}
         <div style={{ textAlign: "center" }}>
           <img
-            src={`/logos/${B?.logo}`}
-            style={{ ...styles.teamLogo, ...logoGlow(B?.id) }}
+            src={B ? `/logos/${B.logo}` : ""}
+            style={{ ...styles.teamLogo, ...(B ? logoGlow(B.id) : {}) }}
             onClick={() => setWinner(B?.id)}
           />
           <div style={styles.teamName}>{B?.name || "—"}</div>
@@ -293,32 +310,80 @@ function FinalsMatch({
   );
 }
 
-
 /* ---------------------------------------------------- */
-/* TERCER LUGAR */
+/* MATCH DE 3ER LUGAR */
 /* ---------------------------------------------------- */
 
-function ThirdMatch({ data, getTeam }) {
-  const A = getTeam(data.a);
-  const B = getTeam(data.b);
+function ThirdMatch({ match, getTeam, selectedCat, token }) {
+  if (!match) return null;
+
+  const A = getTeam(match.a);
+  const B = getTeam(match.b);
+  const winner = match.winner;
+
+  async function setWinnerThird(id) {
+    await fetch("https://roborave.onrender.com/api/bracket/set-winner", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+      body: JSON.stringify({
+        category: selectedCat,
+        round: "third",
+        matchId: match.id,
+        winner: id,
+      }),
+    });
+  }
+
+  const glow = (id) =>
+    winner === id
+      ? {
+          filter: "drop-shadow(0 0 10px #00ff9a)",
+          border: "1px solid rgba(0,255,150,0.9)",
+          transform: "scale(1.05)",
+        }
+      : { opacity: 0.6 };
 
   return (
     <div style={styles.matchCard}>
       <div style={styles.matchRowWithLogos}>
-        <img src={`/logos/${A?.logo}`} style={styles.teamLogo} />
-        <div style={styles.teamName}>{A?.name}</div>
+        {/* TEAM A */}
+        <div style={{ textAlign: "center" }}>
+          <img
+            src={A ? `/logos/${A.logo}` : ""}
+            style={{ ...styles.teamLogo, ...(A ? glow(A.id) : {}) }}
+            onClick={() => A && setWinnerThird(A.id)}
+          />
+          <div style={styles.teamName}>{A?.name || "—"}</div>
+        </div>
 
         <div style={styles.vs}>VS</div>
 
-        <img src={`/logos/${B?.logo}`} style={styles.teamLogo} />
-        <div style={styles.teamName}>{B?.name}</div>
+        {/* TEAM B */}
+        <div style={{ textAlign: "center" }}>
+          <img
+            src={B ? `/logos/${B.logo}` : ""}
+            style={{ ...styles.teamLogo, ...(B ? glow(B.id) : {}) }}
+            onClick={() => B && setWinnerThird(B.id)}
+          />
+          <div style={styles.teamName}>{B?.name || "—"}</div>
+        </div>
       </div>
+
+      {winner && (
+        <div style={styles.winner}>
+          3er lugar: <strong>{getTeam(winner)?.name || "—"}</strong>
+        </div>
+      )}
     </div>
   );
 }
 
+
 /* ---------------------------------------------------- */
-/* ESTILOS (exactos a tu diseño original) */
+/* ESTILOS */
 /* ---------------------------------------------------- */
 
 const styles = {
@@ -328,17 +393,14 @@ const styles = {
     background:
       "radial-gradient(circle at 50% -40vh, #2a2a2a 0, #0b0b0b 45%, #000 100%)",
     padding: "40px 20px",
-
     color: "white",
     textAlign: "center",
-
   },
 
   logo: {
     height: "84px",
     objectFit: "contain",
     marginBottom: "14px",
-
   },
 
   title: {
@@ -346,7 +408,6 @@ const styles = {
     fontWeight: 900,
     marginBottom: "22px",
     letterSpacing: "0.18em",
-
   },
 
   dropdown: {
@@ -357,7 +418,6 @@ const styles = {
     background: "rgba(255,255,255,0.1)",
     color: "white",
     border: "1px solid rgba(255,255,255,0.25)",
-
   },
 
   categoryTitle: {
@@ -378,16 +438,13 @@ const styles = {
     padding: "20px 18px",
     borderRadius: "18px",
     border: "1px solid rgba(255,255,255,0.12)",
-
   },
 
   columnTitle: {
     textAlign: "center",
     fontWeight: 800,
     fontSize: "18px",
-
     marginBottom: "16px",
-
   },
 
   matchList: {
@@ -403,46 +460,28 @@ const styles = {
     border: "1px solid rgba(255,255,255,0.15)",
   },
 
-  /* 🟢 PREMIUM: Contenedor individual del equipo */
-  teamBox: {
-    textAlign: "center",
-    padding: "10px",
-    borderRadius: "14px",
-    transition: "all 0.25s ease",
-  },
-
-  /* 🟢 PREMIUM: Glow elegante solo para ganador */
-  winnerGlow: {
-    boxShadow: "0 0 14px rgba(0,255,140,0.55)",
-    border: "1px solid rgba(0,255,140,0.95)",
-    transform: "scale(1.04)",
-  },
-
   matchRowWithLogos: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     gap: "14px",
-
   },
 
   teamLogo: {
-  width: "72px",
-  height: "72px",
-  borderRadius: "12px",
-  objectFit: "cover",
-  background: "rgba(255,255,255,0.08)",
-  padding: "4px",
-  cursor: "pointer",
-  transition: "all 0.25s ease",
-},
-
+    width: "72px",
+    height: "72px",
+    borderRadius: "12px",
+    objectFit: "cover",
+    background: "rgba(255,255,255,0.08)",
+    padding: "4px",
+    cursor: "pointer",
+    transition: "all 0.25s ease",
+  },
 
   teamName: {
     fontSize: "15px",
     fontWeight: 700,
     textAlign: "center",
-
   },
 
   vs: {
@@ -462,21 +501,16 @@ const styles = {
     padding: "24px",
     borderRadius: "20px",
     background: "rgba(255,255,255,0.15)",
-
   },
 
   championTitle: {
     fontSize: "19px",
-
   },
 
   championTeam: {
     fontSize: "24px",
     fontWeight: 900,
-
   },
 };
 
-
 export { styles };
-
