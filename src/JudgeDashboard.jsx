@@ -10,6 +10,23 @@ export default function JudgeDashboard() {
   const [score, setScore] = useState("");
 
   // --------------------------------------------------
+  // FILTRO DE CATEGORÍAS
+  // --------------------------------------------------
+  const categories = ["ALL", ...new Set(fallbackTeams.map(t => t.category))];
+
+  const [activeCategory, setActiveCategory] = useState("ALL");
+
+  const categoryCount = (cat) => {
+    if (cat === "ALL") return teams.length;
+    return teams.filter((t) => t.category === cat).length;
+  };
+
+  const filteredTeams =
+    activeCategory === "ALL"
+      ? teams
+      : teams.filter((t) => t.category === activeCategory);
+
+  // --------------------------------------------------
   // BLOQUEO DE RUTA SIN TOKEN
   // --------------------------------------------------
   useEffect(() => {
@@ -70,9 +87,25 @@ export default function JudgeDashboard() {
       <div style={styles.container}>
         <h1 style={styles.title}>Panel de Jueces</h1>
 
-        {/* GRID PREMIUM */}
+        {/* ---------------------- FILTROS ---------------------- */}
+        <div style={styles.filterBar}>
+          {categories.map((cat) => (
+            <div
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              style={{
+                ...styles.filterChip,
+                ...(activeCategory === cat ? styles.filterChipActive : {}),
+              }}
+            >
+              {cat === "ALL" ? "Todos" : cat} ({categoryCount(cat)})
+            </div>
+          ))}
+        </div>
+
+        {/* ---------------------- LISTA DE EQUIPOS ---------------------- */}
         <div style={styles.grid}>
-          {teams.map((team) => (
+          {filteredTeams.map((team) => (
             <div
               key={team.id}
               className="score-card"
@@ -86,7 +119,7 @@ export default function JudgeDashboard() {
         </div>
       </div>
 
-      {/* MODAL PREMIUM */}
+      {/* ---------------------- MODAL PREMIUM ---------------------- */}
       {selectedTeam && (
         <div style={styles.modalBackdrop}>
           <div style={styles.modal}>
@@ -151,6 +184,35 @@ const styles = {
     marginBottom: "10px",
   },
 
+  /* ------------------------- FILTROS ------------------------- */
+
+  filterBar: {
+    display: "flex",
+    gap: "10px",
+    overflowX: "auto",
+    paddingBottom: "6px",
+  },
+
+  filterChip: {
+    padding: "8px 14px",
+    background: "rgba(255,255,255,0.10)",
+    borderRadius: "12px",
+    border: "1px solid rgba(255,255,255,0.16)",
+    color: "white",
+    fontSize: "13px",
+    whiteSpace: "nowrap",
+    cursor: "pointer",
+    transition: "0.2s ease",
+  },
+
+  filterChipActive: {
+    background: "rgba(255,255,255,0.22)",
+    border: "1px solid rgba(255,255,255,0.35)",
+    fontWeight: 700,
+  },
+
+  /* ------------------------- GRID ------------------------- */
+
   grid: {
     display: "flex",
     flexDirection: "column",
@@ -165,14 +227,16 @@ const styles = {
     padding: "18px 20px",
     cursor: "pointer",
     transition: "0.22s ease",
+
     display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: "column", // mobile-first
+    alignItems: "flex-start",
+    gap: "6px",
   },
 
   teamName: {
     color: "white",
-    fontSize: "17px",
+    fontSize: "16px",
     fontWeight: 700,
   },
 
@@ -180,6 +244,8 @@ const styles = {
     color: "rgba(255,255,255,0.7)",
     fontSize: "13px",
   },
+
+  /* ------------------------- MODAL ------------------------- */
 
   modalBackdrop: {
     position: "fixed",
