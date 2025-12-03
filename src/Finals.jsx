@@ -46,6 +46,16 @@ export default function Finals() {
     return <Centered text="Sin brackets generados" />;
 
   const current = categories[selectedCat];
+  const final = current?.final?.[0];
+  const champion = current?.champion;
+  const second =
+    final && final.winner
+      ? final.a === final.winner
+        ? final.b
+        : final.a
+      : null;
+
+  const third = current?.thirdWinner;
 
   return (
     <div style={styles.root}>
@@ -73,19 +83,27 @@ export default function Finals() {
             token={token}
           />
 
-          {/* ----------------- 3ER LUGAR ------------------ */}
-          {current.third && current.third.a && current.third.b && (
-  <div style={{ marginTop: 40 }}>
-    <h2 style={styles.categoryTitle}>🥉 Tercer Lugar</h2>
-    <ThirdMatch
-      match={current.third}
-      getTeam={getTeam}
-      selectedCat={selectedCat}
-      token={token}
-    />
-  </div>
-)}
+          {/* ----------------- 3ER LUGAR (arriba del Podium) ------------------ */}
+          {current.third && (
+            <div style={{ marginTop: 50 }}>
+              <h2 style={styles.categoryTitle}>Third Place Match</h2>
+              <ThirdMatch
+                match={current.third}
+                getTeam={getTeam}
+                selectedCat={selectedCat}
+                token={token}
+              />
+            </div>
+          )}
 
+          {/* ----------------- PODIUM OFICIAL (único bloque final) ------------------ */}
+          {champion && second && third && (
+            <OfficialPodium
+              champion={getTeam(champion)}
+              second={getTeam(second)}
+              third={getTeam(third)}
+            />
+          )}
         </>
       )}
     </div>
@@ -125,7 +143,7 @@ function FinalsCategory({ data, getTeam, selectedCat, token }) {
         {data.round16?.length > 0 && (
           <FinalsColumn
             title="round16"
-            label="Octavos"
+            label="Round 16"
             matches={data.round16}
             getTeam={getTeam}
             selectedCat={selectedCat}
@@ -136,7 +154,7 @@ function FinalsCategory({ data, getTeam, selectedCat, token }) {
         {data.quarter?.length > 0 && (
           <FinalsColumn
             title="quarter"
-            label="Cuartos"
+            label="Quarter"
             matches={data.quarter}
             getTeam={getTeam}
             selectedCat={selectedCat}
@@ -147,7 +165,7 @@ function FinalsCategory({ data, getTeam, selectedCat, token }) {
         {data.semi?.length > 0 && (
           <FinalsColumn
             title="semi"
-            label="Semifinales"
+            label="Semifinals"
             matches={data.semi}
             getTeam={getTeam}
             selectedCat={selectedCat}
@@ -166,30 +184,6 @@ function FinalsCategory({ data, getTeam, selectedCat, token }) {
           />
         )}
       </div>
-
-      {/* CAMPEÓN */}
-      {data.champion && (
-        <div style={styles.championBox}>
-          <div style={styles.championTitle}>🏆 CAMPEÓN</div>
-          <div style={styles.championTeam}>
-            {getTeam(data.champion)?.name || "—"}
-          </div>
-        </div>
-      )}
-
-      {/* SUBCAMPEÓN (PERDEDOR DE LA FINAL) */}
-      {data.final?.[0]?.winner && (
-        <div style={{ marginTop: 15, opacity: 0.9 }}>
-          <div style={styles.categoryTitle}>🥈 Segundo Lugar</div>
-          <div style={styles.championTeam}>
-            {(() => {
-              const f = data.final[0];
-              const loser = f.a === f.winner ? f.b : f.a;
-              return getTeam(loser)?.name || "—";
-            })()}
-          </div>
-        </div>
-      )}
     </>
   );
 }
@@ -228,7 +222,7 @@ function FinalsColumn({ title, label, matches, getTeam, selectedCat, token }) {
 }
 
 /* ---------------------------------------------------- */
-/* MATCH (logos clicables, glow premium) */
+/* MATCH */
 /* ---------------------------------------------------- */
 
 function FinalsMatch({
@@ -301,18 +295,12 @@ function FinalsMatch({
           <div style={styles.teamName}>{B?.name || "—"}</div>
         </div>
       </div>
-
-      {winner && (
-        <div style={styles.winner}>
-          Ganador: <strong>{getTeam(winner)?.name || "—"}</strong>
-        </div>
-      )}
     </div>
   );
 }
 
 /* ---------------------------------------------------- */
-/* MATCH DE 3ER LUGAR */
+/* 3RD PLACE MATCH */
 /* ---------------------------------------------------- */
 
 function ThirdMatch({ match, getTeam, selectedCat, token }) {
@@ -373,11 +361,49 @@ function ThirdMatch({ match, getTeam, selectedCat, token }) {
         </div>
       </div>
 
-      {winner && (
-        <div style={styles.winner}>
-          3er lugar: <strong>{getTeam(winner)?.name || "—"}</strong>
-        </div>
-      )}
+    </div>
+  );
+}
+
+/* ---------------------------------------------------- */
+/* PODIUM OFICIAL (VERTICAL, ELEGANTE, PREMIUM™) */
+/* ---------------------------------------------------- */
+
+function OfficialPodium({ champion, second, third }) {
+  return (
+    <div style={{ marginTop: 60 }}>
+      <h2 style={styles.podiumTitle}>Official Podium</h2>
+
+      <div style={styles.podiumColumn}>
+        <PodiumCard place="🥇" team={champion} big />
+        <PodiumCard place="🥈" team={second} />
+        <PodiumCard place="🥉" team={third} />
+      </div>
+    </div>
+  );
+}
+
+function PodiumCard({ place, team, big }) {
+  const metal =
+    place === "🥇"
+      ? styles.podiumCardGold
+      : place === "🥈"
+      ? styles.podiumCardSilver
+      : styles.podiumCardBronze;
+
+  return (
+    <div
+      style={{
+        ...styles.podiumCard,
+        ...metal,
+        ...(big ? { transform: "scale(1.15)" } : {}),
+      }}
+    >
+      <div style={styles.podiumPlace}>{place}</div>
+
+      <img src={`/logos/${team.logo}`} style={styles.podiumLogo} alt="" />
+
+      <div style={styles.podiumName}>{team.name}</div>
     </div>
   );
 }
@@ -392,16 +418,18 @@ const styles = {
     width: "100vw",
     minHeight: "100vh",
     background:
-      "radial-gradient(circle at 50% -40vh, #2a2a2a 0, #0b0b0b 45%, #000 100%)",
+      "radial-gradient(circle at 50% -40vh, #1d1d1d 0, #0a0a0a 45%, #000 100%)",
     padding: "40px 20px",
     color: "white",
     textAlign: "center",
+    fontFamily: "system-ui, -apple-system, sans-serif",
   },
 
   logo: {
     height: "84px",
     objectFit: "contain",
     marginBottom: "14px",
+    filter: "drop-shadow(0 0 4px rgba(255,255,255,0.15))",
   },
 
   title: {
@@ -409,16 +437,18 @@ const styles = {
     fontWeight: 900,
     marginBottom: "22px",
     letterSpacing: "0.18em",
+    textShadow: "0 0 8px rgba(255,255,255,0.1)",
   },
 
   dropdown: {
     padding: "12px 14px",
     fontSize: "16px",
-    borderRadius: "12px",
+    borderRadius: "14px",
     marginBottom: "32px",
-    background: "rgba(255,255,255,0.1)",
+    background: "rgba(255,255,255,0.08)",
     color: "white",
-    border: "1px solid rgba(255,255,255,0.25)",
+    border: "1px solid rgba(255,255,255,0.18)",
+    backdropFilter: "blur(12px)",
   },
 
   categoryTitle: {
@@ -435,10 +465,11 @@ const styles = {
 
   column: {
     minWidth: "260px",
-    background: "rgba(255,255,255,0.05)",
+    background: "rgba(255,255,255,0.04)",
     padding: "20px 18px",
     borderRadius: "18px",
-    border: "1px solid rgba(255,255,255,0.12)",
+    border: "1px solid rgba(255,255,255,0.10)",
+    backdropFilter: "blur(6px)",
   },
 
   columnTitle: {
@@ -456,9 +487,11 @@ const styles = {
 
   matchCard: {
     padding: "18px 16px",
-    borderRadius: "14px",
-    background: "rgba(255,255,255,0.10)",
+    borderRadius: "18px",
+    background: "rgba(255,255,255,0.07)",
     border: "1px solid rgba(255,255,255,0.15)",
+    backdropFilter: "blur(8px)",
+    boxShadow: "0 4px 18px rgba(0,0,0,0.35)",
   },
 
   matchRowWithLogos: {
@@ -471,18 +504,21 @@ const styles = {
   teamLogo: {
     width: "72px",
     height: "72px",
-    borderRadius: "12px",
+    borderRadius: "14px",
     objectFit: "cover",
-    background: "rgba(255,255,255,0.08)",
+    background: "rgba(255,255,255,0.1)",
     padding: "4px",
     cursor: "pointer",
     transition: "all 0.25s ease",
+    border: "1px solid rgba(255,255,255,0.15)",
+    boxShadow: "0 0 8px rgba(0,0,0,0.35)",
   },
 
   teamName: {
     fontSize: "15px",
     fontWeight: 700,
     textAlign: "center",
+    opacity: 0.95,
   },
 
   vs: {
@@ -497,20 +533,107 @@ const styles = {
     color: "#ffefef",
   },
 
-  championBox: {
-    marginTop: "24px",
-    padding: "24px",
-    borderRadius: "20px",
-    background: "rgba(255,255,255,0.15)",
-  },
+  /* ----------------------------------------------------------
+     PODIUM — APPLE VISIONOS GLASS DESIGN
+     ---------------------------------------------------------- */
 
-  championTitle: {
-    fontSize: "19px",
-  },
-
-  championTeam: {
-    fontSize: "24px",
+  podiumTitle: {
+    fontSize: "30px",
+    marginTop: "60px",
+    marginBottom: "32px",
     fontWeight: 900,
+    letterSpacing: "0.03em",
+    color: "white",
+    textShadow: "0 0 12px rgba(255,255,255,0.15)",
+  },
+
+  podiumColumn: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "36px",
+  },
+
+  /* Cartas translúcidas estilo VisionOS */
+  podiumCard: {
+    width: "240px",
+    padding: "28px 20px",
+    borderRadius: "28px",
+    textAlign: "center",
+    backdropFilter: "blur(32px)",
+    background:
+      "linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04))",
+
+    /* glass border */
+    border: "1px solid rgba(255,255,255,0.25)",
+
+    /* soft shadows VisionOS */
+    boxShadow: `
+      0 4px 25px rgba(0,0,0,0.45),
+      inset 0 0 40px rgba(255,255,255,0.06)
+    `,
+
+    transition: "transform 0.25s ease, box-shadow 0.25s ease",
+  },
+
+  /* ORO — minimal elegante */
+  podiumCardGold: {
+    border: "1.6px solid rgba(255,215,0,0.85)",
+    boxShadow: `
+      0 4px 28px rgba(255,220,115,0.35),
+      inset 0 0 40px rgba(255,255,255,0.08)
+    `,
+  },
+
+  /* PLATA */
+  podiumCardSilver: {
+    border: "1.6px solid rgba(210,210,210,0.85)",
+    boxShadow: `
+      0 4px 28px rgba(210,210,210,0.30),
+      inset 0 0 40px rgba(255,255,255,0.08)
+    `,
+  },
+
+  /* BRONCE */
+  podiumCardBronze: {
+    border: "1.6px solid rgba(205,127,50,0.85)",
+    boxShadow: `
+      0 4px 28px rgba(205,127,50,0.35),
+      inset 0 0 40px rgba(255,255,255,0.08)
+    `,
+  },
+
+  podiumPlace: {
+    fontSize: "26px",
+    fontWeight: 800,
+    marginBottom: "14px",
+    opacity: 0.95,
+    textShadow: "0 0 10px rgba(255,255,255,0.12)",
+  },
+
+  podiumLogo: {
+    width: "94px",
+    height: "94px",
+    borderRadius: "18px",
+    objectFit: "cover",
+    marginBottom: "14px",
+
+    background: "rgba(255,255,255,0.12)",
+    border: "1px solid rgba(255,255,255,0.25)",
+    backdropFilter: "blur(20px)",
+
+    boxShadow: `
+      0 4px 14px rgba(0,0,0,0.55),
+      inset 0 0 12px rgba(255,255,255,0.15)
+    `,
+  },
+
+  podiumName: {
+    fontSize: "18px",
+    fontWeight: 800,
+    marginTop: "6px",
+    letterSpacing: "0.4px",
+    opacity: 0.95,
   },
 };
 
