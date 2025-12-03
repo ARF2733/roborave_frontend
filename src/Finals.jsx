@@ -18,11 +18,16 @@ export default function Finals() {
         const json = await r.json();
 
         if (json.ok && json.categories) {
-          setCategories(json.categories);
+          const newCats = json.categories;
+          setCategories(newCats);
 
-          // Selección inicial automática
-          if (!selectedCat) {
-            const first = Object.keys(json.categories)[0];
+          // 🔥 FIX: solo seleccionar automáticamente si no hay selección
+          // o si la categoría seleccionada dejó de existir
+          if (
+            !selectedCat ||
+            (selectedCat && !newCats[selectedCat])
+          ) {
+            const first = Object.keys(newCats)[0];
             if (first) setSelectedCat(first);
           }
         }
@@ -36,7 +41,7 @@ export default function Finals() {
     load();
     const itv = setInterval(load, 2000);
     return () => clearInterval(itv);
-  }, []);
+  }, [selectedCat]); // 🔥 importante: depende de selectedCat para no reelegir siempre
 
   if (loading) {
     return (
@@ -375,7 +380,8 @@ const styles = {
     objectFit: "cover",
     background: "rgba(255,255,255,0.08)",
     padding: "6px",
-    boxShadow: "0 0 6px rgba(0,0,0,0.45), inset 0 0 4px rgba(255,255,255,0.15)",
+    boxShadow:
+      "0 0 6px rgba(0,0,0,0.45), inset 0 0 4px rgba(255,255,255,0.15)",
   },
 
   teamLogoPlaceholder: {
