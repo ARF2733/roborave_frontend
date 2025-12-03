@@ -74,17 +74,18 @@ export default function Finals() {
           />
 
           {/* ----------------- 3ER LUGAR ------------------ */}
-          {current.third && current.third[0] && (
-            <div style={{ marginTop: 40 }}>
-              <h2 style={styles.categoryTitle}>🥉 Tercer Lugar</h2>
-              <ThirdMatch
-                match={current.third[0]}
-                getTeam={getTeam}
-                selectedCat={selectedCat}
-                token={token}
-              />
-            </div>
-          )}
+          {current.third && current.third.a && current.third.b && (
+  <div style={{ marginTop: 40 }}>
+    <h2 style={styles.categoryTitle}>🥉 Tercer Lugar</h2>
+    <ThirdMatch
+      match={current.third}
+      getTeam={getTeam}
+      selectedCat={selectedCat}
+      token={token}
+    />
+  </div>
+)}
+
         </>
       )}
     </div>
