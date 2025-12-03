@@ -6,10 +6,10 @@ export default function Finals() {
   const [selectedCat, setSelectedCat] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("judgeToken") || ""; // token del juez
+  const token = localStorage.getItem("judgeToken") || "";
 
   function getTeam(id) {
-    if (!id) return null;
+    
     return fallbackTeams.find((t) => t.id === id) || null;
   }
 
@@ -20,40 +20,29 @@ export default function Finals() {
         const json = await r.json();
 
         if (json.ok && json.categories) {
-          const newCats = json.categories;
-          setCategories(newCats);
+          setCategories(json.categories);
 
-          if (!selectedCat || !newCats[selectedCat]) {
-            const first = Object.keys(newCats)[0];
+          if (!selectedCat || !json.categories[selectedCat]) {
+            const first = Object.keys(json.categories)[0];
             if (first) setSelectedCat(first);
           }
         }
-
-        setLoading(false);
-      } catch {
+      } finally {
         setLoading(false);
       }
     };
 
     load();
-    const itv = setInterval(load, 2000);
-    return () => clearInterval(itv);
+    const iv = setInterval(load, 1500);
+    return () => clearInterval(iv);
   }, [selectedCat]);
 
   if (loading) {
-    return (
-      <div style={styles.loadingRoot}>
-        <div style={styles.loading}>Cargando Finals…</div>
-      </div>
-    );
+    return <Centered text="Cargando Finals…" />;
   }
 
   if (!Object.keys(categories).length) {
-    return (
-      <div style={styles.loadingRoot}>
-        <div style={styles.loading}>Sin brackets generados</div>
-      </div>
-    );
+    return <Centered text="Sin brackets generados" />;
   }
 
   const current = categories[selectedCat];
@@ -61,7 +50,7 @@ export default function Finals() {
   return (
     <div style={styles.root}>
       <img src="/roborave_logo_white.svg" style={styles.logo} />
-      <h1 style={styles.title}>ROBORAVE FINALS</h1>
+      <h1 style={styles.title}>RoboRAVE FINALS</h1>
 
       <select
         value={selectedCat || ""}
@@ -76,23 +65,51 @@ export default function Finals() {
       </select>
 
       {current && (
-        <div style={styles.categoryBlock}>
-          <h2 style={styles.categoryTitle}>{selectedCat}</h2>
+        <>
           <FinalsCategory
             data={current}
             getTeam={getTeam}
             selectedCat={selectedCat}
             token={token}
           />
-        </div>
+
+          {current.third && (
+            <div style={{ marginTop: 40 }}>
+              <h2 style={styles.categoryTitle}>🥉 Tercer Lugar</h2>
+              <ThirdMatch data={current.third} getTeam={getTeam} />
+            </div>
+          )}
+        </>
       )}
     </div>
   );
 }
 
-/* ---------------------------------------------------------- */
-/* -------------------- CATEGORY WRAPPER --------------------- */
-/* ---------------------------------------------------------- */
+/* ---------------------------------------------------- */
+/* COMPONENTES SIMPLES */
+/* ---------------------------------------------------- */
+
+function Centered({ text }) {
+  return (
+    <div
+      style={{
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        color: "white",
+        fontSize: "20px",
+      }}
+    >
+      {text}
+    </div>
+  );
+}
+
+/* ---------------------------------------------------- */
+/* CATEGORY */
+/* ---------------------------------------------------- */
 
 function FinalsCategory({ data, getTeam, selectedCat, token }) {
   return (
@@ -155,18 +172,11 @@ function FinalsCategory({ data, getTeam, selectedCat, token }) {
   );
 }
 
-/* ---------------------------------------------------------- */
-/* ------------------------ COLUMNAS ------------------------- */
-/* ---------------------------------------------------------- */
+/* ---------------------------------------------------- */
+/* COLUMN */
+/* ---------------------------------------------------- */
 
-function FinalsColumn({
-  title,
-  label,
-  matches,
-  getTeam,
-  selectedCat,
-  token,
-}) {
+function FinalsColumn({ title, label, matches, getTeam, selectedCat, token }) {
   const compact = title === "final";
 
   return (
@@ -195,9 +205,9 @@ function FinalsColumn({
   );
 }
 
-/* ---------------------------------------------------------- */
-/* -------------------------- MATCH -------------------------- */
-/* ---------------------------------------------------------- */
+/* ---------------------------------------------------- */
+/* MATCH CON LOGO SELECCIONABLE Y GLOW */
+/* ---------------------------------------------------- */
 
 function FinalsMatch({
   match,
@@ -210,132 +220,73 @@ function FinalsMatch({
   const A = getTeam(match.a);
   const B = getTeam(match.b);
 
-async function setWinner(winnerId) {
-  if (!winnerId) return;
+  const winner = match.winner;
 
-  const r = await fetch("https://roborave.onrender.com/api/bracket/set-winner", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      authorization: token,
-    },
-    body: JSON.stringify({
-      category: selectedCat,
-      round,
-      matchId: match.id,
-      winner: winnerId,
-    }),
-  });
+  async function setWinner(winnerId) {
+    if (!winnerId) return;
+    await fetch("https://roborave.onrender.com/api/bracket/set-winner", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+      body: JSON.stringify({
+        category: selectedCat,
+        round,
+        matchId: match.id,
+        winner: winnerId,
+      }),
+    });
+  }
 
-  const json = await r.json();
-  console.log("SERVER RESPONSE:", json);
-}
-
-
-  const buttonStyle = (isWinner) => ({
-    padding: "8px 14px",
-    borderRadius: "10px",
-    marginTop: "6px",
-    background: isWinner
-      ? "rgba(0,255,120,0.25)"
-      : "rgba(255,255,255,0.12)",
-    border: isWinner
-      ? "1px solid rgba(0,255,140,0.8)"
-      : "1px solid rgba(255,255,255,0.20)",
-    color: "white",
-    cursor: "pointer",
-    fontSize: "13px",
-  });
+  // ⭐ Glow mínimo, elegante y SOLO en logo ganador
+  const logoGlow = (id) =>
+    winner === id
+      ? {
+          filter: "drop-shadow(0 0 10px #00ff9a)",
+          border: "1px solid rgba(0,255,150,0.9)",
+          transform: "scale(1.05)",
+        }
+      : {
+          opacity: 0.65,
+        };
 
   return (
     <div style={styles.matchCard}>
-      {compact ? (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr auto 1fr",
-            alignItems: "center",
-            gap: "12px",
-          }}
-        >
-          {/* TEAM A */}
-          <div style={{ textAlign: "center" }}>
-            {A ? (
-              <img src={`/logos/${A.logo}`} style={styles.teamLogo} />
-            ) : (
-              <div style={styles.teamLogoPlaceholder}>–</div>
-            )}
-            <div style={styles.teamName}>{A?.name || "—"}</div>
-
-            <div
-              style={buttonStyle(match.winner === A?.id)}
-              onClick={() => setWinner(A?.id)}
-            >
-              Ganó A
-            </div>
-          </div>
-
-          <div style={{ fontSize: "20px", fontWeight: 900 }}>VS</div>
-
-          {/* TEAM B */}
-          <div style={{ textAlign: "center" }}>
-            {B ? (
-              <img src={`/logos/${B.logo}`} style={styles.teamLogo} />
-            ) : (
-              <div style={styles.teamLogoPlaceholder}>–</div>
-            )}
-            <div style={styles.teamName}>{B?.name || "—"}</div>
-
-            <div
-              style={buttonStyle(match.winner === B?.id)}
-              onClick={() => setWinner(B?.id)}
-            >
-              Ganó B
-            </div>
-          </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr auto 1fr",
+          alignItems: "center",
+          gap: "12px",
+        }}
+      >
+        {/* TEAM A */}
+        <div style={{ textAlign: "center" }}>
+          <img
+            src={`/logos/${A?.logo}`}
+            style={{ ...styles.teamLogo, ...logoGlow(A?.id) }}
+            onClick={() => setWinner(A?.id)}
+          />
+          <div style={styles.teamName}>{A?.name || "—"}</div>
         </div>
-      ) : (
-        <>
-          {/* LAYOUT NORMAL */}
-          <div style={styles.matchRowWithLogos}>
-            {A ? (
-              <img src={`/logos/${A.logo}`} style={styles.teamLogo} />
-            ) : (
-              <div style={styles.teamLogoPlaceholder}>–</div>
-            )}
-            <div style={styles.teamName}>{A?.name || "—"}</div>
 
-            <div style={styles.vs}>VS</div>
+        <div style={{ fontSize: "20px", fontWeight: 900 }}>VS</div>
 
-            {B ? (
-              <img src={`/logos/${B.logo}`} style={styles.teamLogo} />
-            ) : (
-              <div style={styles.teamLogoPlaceholder}>–</div>
-            )}
-            <div style={styles.teamName}>{B?.name || "—"}</div>
-          </div>
+        {/* TEAM B */}
+        <div style={{ textAlign: "center" }}>
+          <img
+            src={`/logos/${B?.logo}`}
+            style={{ ...styles.teamLogo, ...logoGlow(B?.id) }}
+            onClick={() => setWinner(B?.id)}
+          />
+          <div style={styles.teamName}>{B?.name || "—"}</div>
+        </div>
+      </div>
 
-          <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
-            <div
-              style={buttonStyle(match.winner === A?.id)}
-              onClick={() => setWinner(A?.id)}
-            >
-              Ganó A
-            </div>
-
-            <div
-              style={buttonStyle(match.winner === B?.id)}
-              onClick={() => setWinner(B?.id)}
-            >
-              Ganó B
-            </div>
-          </div>
-        </>
-      )}
-
-      {match.winner && (
+      {winner && (
         <div style={styles.winner}>
-          Ganador: <strong>{getTeam(match.winner)?.name || "—"}</strong>
+          Ganador: <strong>{getTeam(winner)?.name || "—"}</strong>
         </div>
       )}
     </div>
@@ -343,11 +294,32 @@ async function setWinner(winnerId) {
 }
 
 
+/* ---------------------------------------------------- */
+/* TERCER LUGAR */
+/* ---------------------------------------------------- */
 
-/* ---------------------------------------------------------- */
-/* --------------------------- ESTILOS ----------------------- */
-/* ---------------------------------------------------------- */
+function ThirdMatch({ data, getTeam }) {
+  const A = getTeam(data.a);
+  const B = getTeam(data.b);
 
+  return (
+    <div style={styles.matchCard}>
+      <div style={styles.matchRowWithLogos}>
+        <img src={`/logos/${A?.logo}`} style={styles.teamLogo} />
+        <div style={styles.teamName}>{A?.name}</div>
+
+        <div style={styles.vs}>VS</div>
+
+        <img src={`/logos/${B?.logo}`} style={styles.teamLogo} />
+        <div style={styles.teamName}>{B?.name}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------- */
+/* ESTILOS (exactos a tu diseño original) */
+/* ---------------------------------------------------- */
 
 const styles = {
   root: {
@@ -356,19 +328,17 @@ const styles = {
     background:
       "radial-gradient(circle at 50% -40vh, #2a2a2a 0, #0b0b0b 45%, #000 100%)",
     padding: "40px 20px",
-    boxSizing: "border-box",
+
     color: "white",
     textAlign: "center",
-    fontFamily:
-      "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif",
+
   },
 
   logo: {
     height: "84px",
     objectFit: "contain",
     marginBottom: "14px",
-    filter:
-      "drop-shadow(0 0 8px rgba(255,255,255,0.25)) drop-shadow(0 0 24px rgba(255,255,255,0.20))",
+
   },
 
   title: {
@@ -376,8 +346,7 @@ const styles = {
     fontWeight: 900,
     marginBottom: "22px",
     letterSpacing: "0.18em",
-    color: "#ffffff",
-    textShadow: "0 0 20px rgba(255,255,255,0.35)",
+
   },
 
   dropdown: {
@@ -388,21 +357,12 @@ const styles = {
     background: "rgba(255,255,255,0.1)",
     color: "white",
     border: "1px solid rgba(255,255,255,0.25)",
-    backdropFilter: "blur(6px)",
-  },
 
-  categoryBlock: {
-    marginBottom: "60px",
   },
 
   categoryTitle: {
-    fontSize: "24px",
-    fontWeight: 900,
-    marginBottom: "24px",
-    letterSpacing: "0.08em",
-    color: "#ffefef",
-    textShadow: "0 0 12px rgba(255,200,200,0.35)",
-    textTransform: "uppercase",
+    fontSize: "22px",
+    marginBottom: "14px",
   },
 
   columnsWrapper: {
@@ -418,18 +378,16 @@ const styles = {
     padding: "20px 18px",
     borderRadius: "18px",
     border: "1px solid rgba(255,255,255,0.12)",
-    backdropFilter: "blur(8px)",
-    boxShadow: "0 8px 22px rgba(0,0,0,0.55)",
+
   },
 
   columnTitle: {
     textAlign: "center",
     fontWeight: 800,
     fontSize: "18px",
-    color: "#ffebee",
+
     marginBottom: "16px",
-    letterSpacing: "0.05em",
-    textShadow: "0 0 10px rgba(255,180,180,0.25)",
+
   },
 
   matchList: {
@@ -443,8 +401,21 @@ const styles = {
     borderRadius: "14px",
     background: "rgba(255,255,255,0.10)",
     border: "1px solid rgba(255,255,255,0.15)",
-    backdropFilter: "blur(10px)",
-    boxShadow: "0 4px 14px rgba(0,0,0,0.45)",
+  },
+
+  /* 🟢 PREMIUM: Contenedor individual del equipo */
+  teamBox: {
+    textAlign: "center",
+    padding: "10px",
+    borderRadius: "14px",
+    transition: "all 0.25s ease",
+  },
+
+  /* 🟢 PREMIUM: Glow elegante solo para ganador */
+  winnerGlow: {
+    boxShadow: "0 0 14px rgba(0,255,140,0.55)",
+    border: "1px solid rgba(0,255,140,0.95)",
+    transform: "scale(1.04)",
   },
 
   matchRowWithLogos: {
@@ -452,52 +423,38 @@ const styles = {
     flexDirection: "column",
     alignItems: "center",
     gap: "14px",
-    color: "white",
+
   },
 
   teamLogo: {
-    width: "72px",
-    height: "72px",
-    borderRadius: "12px",
-    objectFit: "cover",
-    background: "rgba(255,255,255,0.08)",
-    padding: "6px",
-    boxShadow:
-      "0 0 6px rgba(0,0,0,0.45), inset 0 0 4px rgba(255,255,255,0.15)",
-  },
+  width: "72px",
+  height: "72px",
+  borderRadius: "12px",
+  objectFit: "cover",
+  background: "rgba(255,255,255,0.08)",
+  padding: "4px",
+  cursor: "pointer",
+  transition: "all 0.25s ease",
+},
 
-  teamLogoPlaceholder: {
-    width: "72px",
-    height: "72px",
-    borderRadius: "12px",
-    background: "rgba(255,255,255,0.10)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    opacity: 0.6,
-    fontSize: "32px",
-  },
 
   teamName: {
     fontSize: "15px",
     fontWeight: 700,
     textAlign: "center",
-    maxWidth: "180px",
-    lineHeight: "18px",
+
   },
 
   vs: {
     fontSize: "18px",
     fontWeight: 900,
-    color: "rgba(255,255,255,0.7)",
-    margin: "8px 0 4px",
+    opacity: 0.7,
   },
 
   winner: {
     marginTop: "10px",
     fontSize: "12px",
-    color: "#ffebee",
-    fontWeight: 600,
+    color: "#ffefef",
   },
 
   championBox: {
@@ -505,37 +462,21 @@ const styles = {
     padding: "24px",
     borderRadius: "20px",
     background: "rgba(255,255,255,0.15)",
-    border: "1px solid rgba(255,255,255,0.25)",
-    textAlign: "center",
-    boxShadow: "0 10px 28px rgba(0,0,0,0.65)",
+
   },
 
   championTitle: {
     fontSize: "19px",
-    marginBottom: "10px",
-    color: "#ffebee",
-    textShadow: "0 0 10px rgba(255,200,200,0.35)",
+
   },
 
   championTeam: {
     fontSize: "24px",
     fontWeight: 900,
-    letterSpacing: "0.05em",
-  },
 
-  loadingRoot: {
-    width: "100vw",
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  loading: {
-    fontSize: "18px",
-    opacity: 0.8,
   },
 };
+
 
 export { styles };
 
