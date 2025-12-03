@@ -264,8 +264,8 @@ function FinalsMatch({
             <div style={styles.teamName}>{A?.name || "—"}</div>
 
             <div
-              style={buttonStyle(match.winner === A?.teamId)}
-              onClick={() => setWinner(A?.teamId)}
+              style={buttonStyle(match.winner === A?.id)}
+              onClick={() => setWinner(A?.id)}
             >
               Ganó A
             </div>
@@ -283,8 +283,8 @@ function FinalsMatch({
             <div style={styles.teamName}>{B?.name || "—"}</div>
 
             <div
-              style={buttonStyle(match.winner === B?.teamId)}
-              onClick={() => setWinner(B?.teamId)}
+              style={buttonStyle(match.winner === B?.id)}
+              onClick={() => setWinner(B?.id)}
             >
               Ganó B
             </div>
@@ -313,15 +313,15 @@ function FinalsMatch({
 
           <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
             <div
-              style={buttonStyle(match.winner === A?.teamId)}
-              onClick={() => setWinner(A?.teamId)}
+              style={buttonStyle(match.winner === A?.id)}
+              onClick={() => setWinner(A?.id)}
             >
               Ganó A
             </div>
 
             <div
-              style={buttonStyle(match.winner === B?.teamId)}
-              onClick={() => setWinner(B?.teamId)}
+              style={buttonStyle(match.winner === B?.id)}
+              onClick={() => setWinner(B?.id)}
             >
               Ganó B
             </div>
@@ -337,6 +337,7 @@ function FinalsMatch({
     </div>
   );
 }
+
 
 /* ---------------------------------------------------------- */
 /* --------------------------- ESTILOS ----------------------- */
