@@ -44,7 +44,7 @@ export const fallbackTeams = [
   { id: 43, name: "Hidrobots",                  score: 0, flag:"mx", logo:"logomx.png",       category: "FAST_MS" },
   { id: 44, name: "Tecnosec6",                  score: 0, flag:"mx", logo:"logomx.png",       category: "FAST_MS" },
   { id: 45, name: "Robocidem",                  score: 0, flag:"mx", logo:"logomx.png",       category: "FAST_MS" },
-  { id: 46, name: "MecaRaptors",                score: 0, flag:"mx", logo:"logomx.png",       category: "FAST_HS" },
+  { id: 46, name: "MecaRaptors",                score: 0, flag:"mx", logo:"logomx.png",       category: "FAST_UP" },
   { id: 47, name: "MecaRaptors",                score: 0, flag:"mx", logo:"logomx.png",       category: "FAST_MS" },
   { id: 48, name: "Anonimus Robots",            score: 0, flag:"mx", logo:"logomx.png",       category: "SOCCER_MS" },
   { id: 49, name: "MANTARRAYA",                 score: 0, flag:"mx", logo:"logomx.png",       category: "SUMO1K_UP" },
