@@ -69,5 +69,6 @@ export const fallbackTeams = [
   { id: 68, name: "Magic Cats",                 score: 0, flag:"mx", logo:"katatronik.png",   category: "A-MAZE-ING_ES" },
   { id: 69, name: "Cheetahs",                   score: 0, flag:"mx", logo:"katatronik.png",   category: "A-MAZE-ING_ES" },
   { id: 70, name: "Lions",                      score: 0, flag:"mx", logo:"katatronik.png",   category: "A-MAZE-ING_MS" },
+  { id: 71, name: "Tigers",                     score: 0, flag:"mx", logo:"katatronik.png",   category: "A-MAZE-ING_ES" },
 
 ];
