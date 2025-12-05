@@ -70,5 +70,6 @@ export const fallbackTeams = [
   { id: 69, name: "Lions",                      score: 0, flag:"mx", logo:"katatronik.png",   category: "A-MAZE-ING_MS" },
   { id: 70, name: "Tigers",                     score: 0, flag:"mx", logo:"katatronik.png",   category: "A-MAZE-ING_ES" },
   { id: 71, name: "Code Bots - Aspaen Neiva",   score: 0, flag:"co", logo:"aspaen.png",       category: "A-MAZE-ING_ES" },
+  { id: 72, name: "Los Chikillos",              score: 0, flag:"mx", logo:"logomx.png",       category: "SUMO_OPEN" },
 
 ];
