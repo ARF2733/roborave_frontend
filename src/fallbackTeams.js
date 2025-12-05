@@ -9,7 +9,7 @@ export const fallbackTeams = [
   { id: 8,  name: "ValleBot_4",                 score: 0, flag:"mx", logo:"vallebot.png",     category: "A-MAZE-ING_MS" },
   { id: 9,  name: "ValleBot_3",                 score: 0, flag:"mx", logo:"vallebot.png",     category: "A-MAZE-ING_ES" },
   { id: 10, name: "Iron Bots",                  score: 0, flag:"mx", logo:"logomx.png",       category: "SUMO1K_HS" },
-  { id: 11, name: "Mechanic Fight",             score: 0, flag:"mx", logo:"logomx.png",       category: "SUMO1K_HS" },
+  { id: 11, name: "Mechanic Fight",             score: 0, flag:"mx", logo:"logomx.png",       category: "SUMO_MS" },
   { id: 12, name: "Short Circuit",              score: 0, flag:"mx", logo:"logomx.png",       category: "SUMO1K_HS" },
   { id: 13, name: "Conalep Piedras Negras",     score: 0, flag:"mx", logo:"conaleppn.png",    category: "SUMO1K_HS" },
   { id: 14, name: "Innademy - Elian",           score: 0, flag:"mx", logo:"innademy.png",     category: "SUMO_ES" },
