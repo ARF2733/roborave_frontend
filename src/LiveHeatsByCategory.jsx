@@ -97,6 +97,7 @@ const CATEGORY_ORDER = [
   "a-MAZE-ing",
   "SumoBot Lego",
   "SumoBot 1 Kg",
+  "SumoBot",
   "SumoBot 3 Kg",
   "Fire Fighting",
   "Entrepreneurial",
@@ -131,6 +132,8 @@ function formatCategory(cat) {
     "SUMO1K_MS": "SumoBot 1 Kg • MS",
     "SUMO1K_HS": "SumoBot 1 Kg • HS",
     "SUMO1K_UP": "SumoBot 1 Kg • UP",
+
+    "SUMO_OPEN": "SumoBot • OPEN",
 
     // Fire Fighting
     "FIRE_HS": "Fire Fighting • HS",
