@@ -64,14 +64,11 @@ export const fallbackTeams = [
   { id: 63, name: "Wildcats",                   score: 0, flag:"mx", logo:"katatronik.png",   category: "ENTRE_HS" },
   { id: 64, name: "Thundercats",                score: 0, flag:"mx", logo:"katatronik.png",   category: "FIRE_HS" },
   { id: 65, name: "Lynx",                       score: 0, flag:"mx", logo:"katatronik.png",   category: "FIRE_HS" },
-  { id: 66, name: "Crazy Cats",                 score: 0, flag:"mx", logo:"katatronik.png",   category: "SUMO_ES" },
-  { id: 67, name: "Crazy Cats",                 score: 0, flag:"mx", logo:"katatronik.png",   category: "SUMO_MS" },
-  { id: 68, name: "Magic Cats",                 score: 0, flag:"mx", logo:"katatronik.png",   category: "A-MAZE-ING_ES" },
-  { id: 69, name: "Cheetahs",                   score: 0, flag:"mx", logo:"katatronik.png",   category: "A-MAZE-ING_ES" },
-  { id: 70, name: "Lions",                      score: 0, flag:"mx", logo:"katatronik.png",   category: "A-MAZE-ING_MS" },
-  { id: 71, name: "Tigers",                     score: 0, flag:"mx", logo:"katatronik.png",   category: "A-MAZE-ING_ES" },
-  { id: 72, name: "Code Bots - Aspaen Neiva",   score: 0, flag:"mx", logo:"aspaen.png",       category: "A-MAZE-ING_MS" },
-
-  
+  { id: 66, name: "Crazy Cats",                 score: 0, flag:"mx", logo:"katatronik.png",   category: "SUMO_MS" },
+  { id: 67, name: "Magic Cats",                 score: 0, flag:"mx", logo:"katatronik.png",   category: "A-MAZE-ING_ES" },
+  { id: 68, name: "Cheetahs",                   score: 0, flag:"mx", logo:"katatronik.png",   category: "A-MAZE-ING_ES" },
+  { id: 69, name: "Lions",                      score: 0, flag:"mx", logo:"katatronik.png",   category: "A-MAZE-ING_MS" },
+  { id: 70, name: "Tigers",                     score: 0, flag:"mx", logo:"katatronik.png",   category: "A-MAZE-ING_ES" },
+  { id: 71, name: "Code Bots - Aspaen Neiva",   score: 0, flag:"mx", logo:"aspaen.png",       category: "A-MAZE-ING_MS" },
 
 ];
