@@ -16,10 +16,17 @@ export default function LiveHeatsByCategory({ teams }) {
   return (
     <div style={styles.wrapper}>
       {orderedEntries.map(([category, list]) => {
-
-        // ⭐ ORDENAR POR PUNTAJE (mayor → menor)
+        // ⭐ ORDEN POR PUNTAJE
         const sortedList = [...list].sort((a, b) => b.score - a.score);
-        // si es "points" o "total", solo cambia score por el nombre correcto
+
+        // ⭐ CUÁNTOS CLASIFICAN SEGÚN LA CANTIDAD
+        let limit = 4;
+        if (sortedList.length >= 32) limit = 32;
+        else if (sortedList.length >= 16) limit = 16;
+        else if (sortedList.length >= 8) limit = 8;
+
+        // ⭐ IDs de clasificados
+        const qualifiedIds = new Set(sortedList.slice(0, limit).map(t => t.id));
 
         return (
           <div key={category} style={styles.section}>
@@ -33,8 +40,11 @@ export default function LiveHeatsByCategory({ teams }) {
             {/* Línea separadora */}
             <div style={styles.divider} />
 
-            {/* Grid con medallas */}
-            <LiveHeatsGrid teams={sortedList} />
+            {/* GRID — ahora recibe quién está clasificado */}
+            <LiveHeatsGrid 
+              teams={sortedList} 
+              qualified={qualifiedIds}
+            />
           </div>
         );
       })}
@@ -119,15 +129,15 @@ function sortCategories(a, b) {
 
 function formatCategory(cat) {
   const map = {
-    // a-MAZE-ing
+
     "A-MAZE-ING_ES": "a-MAZE-ing • ES",
     "A-MAZE-ING_MS": "a-MAZE-ing • MS",
 
-    // SumoBot Lego
+
     "SUMO_ES": "SumoBot Lego • ES",
     "SUMO_MS": "SumoBot Lego • MS",
 
-    // SumoBot 1 Kg
+
     "SUMO1K_ES": "SumoBot 1 Kg • ES",
     "SUMO1K_MS": "SumoBot 1 Kg • MS",
     "SUMO1K_HS": "SumoBot 1 Kg • HS",
@@ -135,27 +145,27 @@ function formatCategory(cat) {
 
     "SUMO_OPEN": "SumoBot • OPEN",
 
-    // Fire Fighting
+
     "FIRE_HS": "Fire Fighting • HS",
 
-    // SumoBot 3 Kg
+
     "SUMO3K_HS": "SumoBot 3 Kg • HS",
     "SUMO3K_UP": "SumoBot 3 Kg • UP",
 
-    // Soccer Futbol
+
     "SOCCER_ES": "Soccer Futbol • ES",
     "SOCCER_MS": "Soccer Futbol • MS",
     "SOCCER_HS": "Soccer Futbol • HS",
 
-    // Fastbot
+
     "FAST_MS": "Fastbot • MS",
     "FAST_HS": "Fastbot • HS",
     "FAST_UP": "Fastbot • UP",
 
-    // Line Following
+
     "LINE_HS": "Line Following • HS",
 
-    // Entrepreneurial
+    
     "ENTRE_HS": "Entrepreneurial • HS",
   };
 

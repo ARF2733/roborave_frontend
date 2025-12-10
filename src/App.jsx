@@ -5,6 +5,7 @@ import FullscreenRoboRAVE from "./FullscreenRoboRAVE";
 import LiveHeatsByCategory from "./LiveHeatsByCategory";
 import Judge from "./Judge";
 import JudgeDashboard from "./JudgeDashboard";
+import JudgePrelims from "./JudgePrelims";
 import RoboRaveTV from "./RoboRaveTV";
 import Finals from "./Finals";
 
@@ -41,6 +42,7 @@ export default function App() {
         />
 
         <Route path="/judge/dashboard" element={<JudgeDashboard />} />
+        <Route path="/judge/prelims" element={<JudgePrelims />} />
         
         <Route path="/tv" element={<RoboRaveTV />} />
         <Route path="/finals" element={<Finals />} />

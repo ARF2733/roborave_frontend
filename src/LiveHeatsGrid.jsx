@@ -1,42 +1,47 @@
 // LiveHeatsGrid.jsx
-export default function LiveHeatsGrid({ teams }) {
+export default function LiveHeatsGrid({ teams, qualified }) {
   return (
     <div style={styles.grid}>
-      {teams.map((t, index) => (
-        <div key={t.id} style={styles.card} className="score-card">
-          
-          {/* MEDALLAS TOP 3 */}
-          {index < 3 && (
-            <span style={styles.medal}>
-              {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
+      {teams.map((t, index) => {
+        const isQualified = qualified?.has(t.id);
+
+        return (
+          <div
+            key={t.id}
+            style={{
+              ...styles.card,
+              ...(isQualified ? styles.cardQualified : {}),
+            }}
+            className="score-card"
+          >
+            {/* ICONO CLASIFICADO / NO CLASIFICADO */}
+            <span style={styles.statusIcon}>
+              {isQualified ? "✅" : "❌"}
             </span>
-          )}
 
-          {/* LOGO */}
-          <img
-            src={`/logos/${t.logo}`}
-            alt={t.name}
-            style={styles.logo}
-          />
 
-          {/* INFO */}
-          <div style={styles.info}>
-            <div style={styles.name}>{t.name}</div>
+            {/* LOGO */}
+            <img src={`/logos/${t.logo}`} alt={t.name} style={styles.logo} />
 
-            <div style={styles.meta}>
-              <img
-                src={`/flags/${t.flag}.png`}
-                alt={t.flag}
-                style={styles.flag}
-              />
-              <span style={styles.country}>{t.flag.toUpperCase()}</span>
+            {/* INFO */}
+            <div style={styles.info}>
+              <div style={styles.name}>{t.name}</div>
+
+              <div style={styles.meta}>
+                <img
+                  src={`/flags/${t.flag}.png`}
+                  alt={t.flag}
+                  style={styles.flag}
+                />
+                <span style={styles.country}>{t.flag.toUpperCase()}</span>
+              </div>
             </div>
-          </div>
 
-          {/* SCORE */}
-          <div style={styles.score}>{t.score}</div>
-        </div>
-      ))}
+            {/* SCORE */}
+            <div style={styles.score}>{t.score}</div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -72,6 +77,24 @@ const styles = {
 
     transition: "all 0.22s ease",
     cursor: "default",
+  },
+
+  // ⭐ ESTILO PARA CLASIFICADOS
+  cardQualified: {
+    border: "1px solid #00ff9a",
+    background:
+      "linear-gradient(135deg, rgba(0,255,150,0.25), rgba(0,255,150,0.10))",
+    boxShadow: "0 0 14px rgba(0,255,150,0.45)",
+    transform: "scale(1.015)",
+  },
+
+  // ⭐ NUEVO: COPA / TACHITA
+  statusIcon: {
+    position: "absolute",
+    top: "8px",
+    right: "12px",
+    fontSize: "22px",
+    opacity: 0.9,
   },
 
   medal: {
@@ -119,7 +142,6 @@ const styles = {
     height: "14px",
     borderRadius: "3px",
     objectFit: "cover",
-  
   },
 
   country: {
@@ -134,8 +156,5 @@ const styles = {
     color: "#ffebee",
     minWidth: "40px",
     textAlign: "right",
-
   },
-
-
 };

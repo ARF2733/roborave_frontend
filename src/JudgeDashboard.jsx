@@ -127,9 +127,16 @@ export default function JudgeDashboard() {
       <div style={styles.container}>
         <h1 style={styles.title}>Panel de Jueces</h1>
 
+        <button
+  onClick={() => navigate("/judge/prelims")}
+  style={styles.prelimsButton}
+>
+  Preliminares
+</button>
+
         {/* BOTÓN BRACKET (usa la categoría actual) */}
         <button onClick={generateBracket} style={styles.bracketButton}>
-          Generar Bracket Eliminatorio (categoría actual)
+          Generar Bracket de Finales
         </button>
 
         {/* FILTRO DE CATEGORÍAS */}
@@ -380,4 +387,19 @@ const styles = {
     fontSize: "15px",
     fontWeight: 600,
   },
+
+  prelimsButton: {
+  background: "linear-gradient(90deg, #4da6ff, #1a75ff)",
+  padding: "14px",
+  borderRadius: "14px",
+  border: "1px solid rgba(255,255,255,0.25)",
+  color: "white",
+  fontWeight: 700,
+  fontSize: "16px",
+  cursor: "pointer",
+  textAlign: "center",
+  letterSpacing: "0.05em",
+  boxShadow: "0 4px 15px rgba(0,80,255,0.25)",
+},
+
 };
