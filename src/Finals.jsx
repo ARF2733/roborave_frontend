@@ -151,6 +151,17 @@ function FinalsCategory({ data, getTeam, selectedCat, token }) {
           />
         )}
 
+        {data.round8?.length > 0 && (
+          <FinalsColumn
+            title="round8"
+            label="Round 8"
+            matches={data.round8}
+            getTeam={getTeam}
+            selectedCat={selectedCat}
+            token={token}
+          />
+        )}
+
         {data.quarter?.length > 0 && (
           <FinalsColumn
             title="quarter"
@@ -187,6 +198,7 @@ function FinalsCategory({ data, getTeam, selectedCat, token }) {
     </>
   );
 }
+
 
 /* ---------------------------------------------------- */
 /* COLUMN */
