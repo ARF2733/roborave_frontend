@@ -43,7 +43,7 @@ export default function Home() {
             onMouseEnter={() => setHover("scores")}
             onMouseLeave={() => setHover(null)}
           >
-            Ir al Evento
+            Preliminares
           </a>
 
           <a
