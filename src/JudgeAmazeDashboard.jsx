@@ -68,23 +68,29 @@ const styles = {
     opacity: 0.9,
   },
 
+  /* ------------------- CUADRADOS ------------------- */
   buttonsWrapper: {
     display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-    width: "100%",
-    maxWidth: "420px",
+    flexDirection: "row",
+    gap: "26px",
+    justifyContent: "center",
   },
 
   button: {
-    padding: "18px",
-    borderRadius: "16px",
+    width: "180px",
+    height: "180px",
+    borderRadius: "18px",
     fontSize: "18px",
     fontWeight: 700,
     cursor: "pointer",
     transition: "all .25s ease",
     backdropFilter: "blur(12px)",
     border: "1px solid rgba(255,255,255,0.18)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    userSelect: "none",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
   },
 
   buttonLight: {
@@ -97,3 +103,4 @@ const styles = {
     color: "white",
   },
 };
+
