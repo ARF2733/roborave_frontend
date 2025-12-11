@@ -8,27 +8,38 @@ export default function JudgeAmazePrelims() {
 
   const token = localStorage.getItem("judgeToken");
 
-  // -----------------------------
-  // LOAD ONLY A-MAZE-ing TEAMS
-  // -----------------------------
+  /* -------------------------------------------------- */
+  /* FORMAT CATEGORY — versión bonita como Live Heats    */
+  /* -------------------------------------------------- */
+  function formatCategory(cat) {
+    const map = {
+      "A-MAZE-ING_ES": "a-MAZE-ing • ES",
+      "A-MAZE-ING_MS": "a-MAZE-ing • MS",
+    };
+    return map[cat] || cat;
+  }
+
+  /* -------------------------------------------------- */
+  /* LOAD ONLY A-MAZE-ing TEAMS                         */
+  /* -------------------------------------------------- */
   useEffect(() => {
-    const amazeTeams = fallbackTeams.filter(t =>
+    const amazeTeams = fallbackTeams.filter((t) =>
       t.category.startsWith("A-MAZE-ING")
     );
     setTeams(amazeTeams);
   }, []);
 
-  // -----------------------------
-  // TOAST PREMIUM
-  // -----------------------------
+  /* -------------------------------------------------- */
+  /* TOAST PREMIUM                                      */
+  /* -------------------------------------------------- */
   const showToast = (message, type = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 2500);
   };
 
-  // -----------------------------
-  // HANDLE SCORE INPUT
-  // -----------------------------
+  /* -------------------------------------------------- */
+  /* HANDLE SCORE INPUT                                 */
+  /* -------------------------------------------------- */
   const updateScore = (id, value) => {
     setScores((prev) => ({
       ...prev,
@@ -36,9 +47,9 @@ export default function JudgeAmazePrelims() {
     }));
   };
 
-  // -----------------------------
-  // SUBMIT SCORE
-  // -----------------------------
+  /* -------------------------------------------------- */
+  /* SUBMIT SCORE                                       */
+  /* -------------------------------------------------- */
   const submitScore = async (team) => {
     const value = scores[team.id];
 
@@ -77,8 +88,7 @@ export default function JudgeAmazePrelims() {
 
   return (
     <div style={styles.root}>
-
-      {/* ---------------- TOAST ---------------- */}
+      {/* TOAST */}
       {toast && (
         <div
           style={{
@@ -92,20 +102,18 @@ export default function JudgeAmazePrelims() {
         </div>
       )}
 
-      <h1 style={styles.title}>Preliminares • a-MAZE-ing</h1>
+      <h1 style={styles.title}>a-MAZE-ing</h1>
 
       <div style={styles.list}>
         {teams.map((team) => (
           <div key={team.id} style={styles.card}>
             <div style={styles.header}>
-              <img
-                src={`/logos/${team.logo}`}
-                alt=""
-                style={styles.logo}
-              />
+              <img src={`/logos/${team.logo}`} alt="" style={styles.logo} />
+
               <div>
                 <div style={styles.teamName}>{team.name}</div>
-                <div style={styles.category}>{team.category}</div>
+                {/* ⭐ CATEGORY BONITA */}
+                <div style={styles.category}>{formatCategory(team.category)}</div>
               </div>
             </div>
 
