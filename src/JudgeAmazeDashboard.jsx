@@ -19,15 +19,15 @@ export default function JudgeAmazeDashboard() {
         style={styles.logo}
       />
 
-      <h1 style={styles.title}>A-MAZE-ing • Panel del Juez</h1>
+      <h2 style={styles.title}>a-MAZE-ing</h2>
 
       <div style={styles.buttonsWrapper}>
         <button style={{ ...styles.button, ...styles.buttonLight }} onClick={goPrelims}>
-          Preliminares Día 1
+          Preliminares
         </button>
 
         <button style={{ ...styles.button, ...styles.buttonDark }} onClick={goFinals}>
-          Finales Día 2
+          Finales
         </button>
       </div>
     </div>
@@ -35,7 +35,7 @@ export default function JudgeAmazeDashboard() {
 }
 
 /* -------------------------------------------------- */
-/* ESTILOS — Cuadrados, elegantes, industriales */
+/* ESTILOS — Minimal Pro, elegante, neutro */
 /* -------------------------------------------------- */
 
 const styles = {
@@ -77,16 +77,14 @@ const styles = {
   },
 
   button: {
-    padding: "20px",
-    borderRadius: "0px",
+    padding: "18px",
+    borderRadius: "16px",
     fontSize: "18px",
-    fontWeight: 800,
+    fontWeight: 700,
     cursor: "pointer",
-    transition: "all .2s ease",
-    textTransform: "uppercase",
-    backdropFilter: "blur(10px)",
-    border: "1px solid rgba(255,255,255,0.22)",
-    letterSpacing: "0.06em",
+    transition: "all .25s ease",
+    backdropFilter: "blur(12px)",
+    border: "1px solid rgba(255,255,255,0.18)",
   },
 
   buttonLight: {
