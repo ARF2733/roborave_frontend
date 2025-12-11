@@ -269,8 +269,8 @@ function FinalsMatch({
   const logoGlow = (id) =>
     winner === id
       ? {
-          filter: "drop-shadow(0 0 10px #ffffffff)",
-          border: "1px solid rgba(0, 0, 0, 0.44)",
+          filter: "drop-shadow(0 0 10px #00ff9a)",
+          border: "1px solid rgba(0,255,150,0.9)",
           transform: "scale(1.05)",
         }
       : { opacity: 0.6 };
@@ -341,8 +341,8 @@ function ThirdMatch({ match, getTeam, selectedCat, token }) {
   const glow = (id) =>
     winner === id
       ? {
-          filter: "drop-shadow(0 0 10px #ffffffff)",
-          border: "1px solid rgba(0, 0, 0, 0.44)",
+          filter: "drop-shadow(0 0 10px #00ff99ff)",
+          border: "1px solid rgba(0,255,150,0.9)",
           transform: "scale(1.05)",
         }
       : { opacity: 0.6 };
