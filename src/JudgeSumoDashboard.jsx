@@ -1,14 +1,14 @@
 import { useNavigate } from "react-router-dom";
 
-export default function JudgeAmazeDashboard() {
+export default function JudgeSumoDashboard() {
   const navigate = useNavigate();
 
   function goPrelims() {
-    navigate("/judge/amaze/prelims");
+    navigate("/judge/sumo/prelims");
   }
 
   function goFinals() {
-    navigate("/judge/amaze/finals");
+    navigate("/judge/sumo/finals");
   }
 
   return (
@@ -19,14 +19,20 @@ export default function JudgeAmazeDashboard() {
         style={styles.logo}
       />
 
-      <h2 style={styles.title}>a-MAZE-ing</h2>
+      <h2 style={styles.title}>SumoBot</h2>
 
       <div style={styles.buttonsWrapper}>
-        <button style={{ ...styles.button, ...styles.buttonLight }} onClick={goPrelims}>
+        <button
+          style={{ ...styles.button, ...styles.buttonLight }}
+          onClick={goPrelims}
+        >
           Preliminares
         </button>
 
-        <button style={{ ...styles.button, ...styles.buttonDark }} onClick={goFinals}>
+        <button
+          style={{ ...styles.button, ...styles.buttonDark }}
+          onClick={goFinals}
+        >
           Finales
         </button>
       </div>
@@ -106,3 +112,4 @@ const styles = {
     border: "1px solid rgba(0, 0, 0, 0.58)",
   },
 };
+

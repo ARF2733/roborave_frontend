@@ -7,6 +7,7 @@ import LiveScoresContainer from "./LiveScoresContainer";
 import Judge from "./Judge";
 import JudgeSelect from "./JudgeSelect";
 import JudgeAmazeDashboard from "./JudgeAmazeDashboard";
+import JudgeSumoDashboard from "./JudgeSumoDashboard";
 import JudgeDashboard from "./JudgeDashboard";
 import JudgePrelims from "./JudgePrelims";
 
@@ -41,6 +42,8 @@ export default function App() {
         {/* NUEVA PANTALLA DE SELECCIÓN */}
         <Route path="/judge/select" element={<JudgeSelect />} />
         <Route path="/judge/amaze" element={<JudgeAmazeDashboard />} />
+        <Route path="/judge/sumobot" element={<JudgeSumoDashboard />} />
+
 
         {/* DASHBOARD GENÉRICO (se irá eliminando pronto) */}
         <Route path="/judge/dashboard" element={<JudgeDashboard />} />
