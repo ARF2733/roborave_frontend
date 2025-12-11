@@ -8,25 +8,32 @@ export default function JudgePrelims() {
      GENERAR 3 RONDAS ALEATORIAS
   --------------------------------------------------- */
   function generateRounds() {
-    const shuffled = [...fallbackTeams].sort(() => Math.random() - 0.5);
-    const pairs = [];
+  // 1) Filtrar solo equipos de SUMO
+  const sumoTeams = fallbackTeams.filter(t => t.category === "SUMO_ES");
 
-    for (let i = 0; i < shuffled.length; i += 2) {
-      if (shuffled[i + 1]) {
-        pairs.push({
-          a: shuffled[i],
-          b: shuffled[i + 1],
-          winner: null,
-        });
-      }
+  // 2) Mezclar aleatoriamente
+  const shuffled = [...sumoTeams].sort(() => Math.random() - 0.5);
+
+  // 3) Emparejar de 2 en 2
+  const pairs = [];
+  for (let i = 0; i < shuffled.length; i += 2) {
+    if (shuffled[i + 1]) {
+      pairs.push({
+        a: shuffled[i],
+        b: shuffled[i + 1],
+        winner: null,
+      });
     }
-
-    setRounds([
-      [...pairs],
-      [...pairs],
-      [...pairs],
-    ]);
   }
+
+  // 4) Guardar las 3 rondas
+  setRounds([
+    [...pairs],
+    [...pairs],
+    [...pairs],
+   ]);
+  }
+
 
   /* ---------------------------------------------------
      ACTUALIZAR GANADOR (reactivo)
