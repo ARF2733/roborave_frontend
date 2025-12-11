@@ -9,12 +9,23 @@ export default function JudgeDashboard() {
   const [filteredCategory, setFilteredCategory] = useState("ALL");
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [score, setScore] = useState("");
+  const [toast, setToast] = useState(null); // 👈 NUEVO
 
   // Categorías únicas
   const categories = [
     "ALL",
     ...Array.from(new Set(fallbackTeams.map((t) => t.category))),
   ];
+
+  // --------------------------------------------------
+  // TOAST LINDO (SIN ALERT BLOCKING)
+  // --------------------------------------------------
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 2500);
+  };
 
   // --------------------------------------------------
   // BLOQUEO DE RUTA SIN TOKEN
@@ -48,36 +59,40 @@ export default function JudgeDashboard() {
   // --------------------------------------------------
   const submitScore = async () => {
     if (!selectedTeam || !score) {
-      alert("Falta puntaje");
+      showToast("Falta puntaje", "error");
       return;
     }
 
     const token = localStorage.getItem("judgeToken");
 
-    const r = await fetch("https://roborave.onrender.com/api/submit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token,
-      },
-      body: JSON.stringify({
-        teamId: selectedTeam.id,
-        category: selectedTeam.category,
-        heat: 1,
-        score: { points: Number(score) },
-      }),
-    });
+    try {
+      const r = await fetch("https://roborave.onrender.com/api/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify({
+          teamId: selectedTeam.id,
+          category: selectedTeam.category,
+          heat: 1,
+          score: { points: Number(score) },
+        }),
+      });
 
-    const json = await r.json();
+      const json = await r.json();
 
-    if (!json.ok) {
-      alert("Error enviando puntaje");
-      return;
+      if (!json.ok) {
+        showToast(json.error || "Error enviando puntaje", "error");
+        return;
+      }
+
+      showToast("Puntaje registrado");
+      setSelectedTeam(null);
+      setScore("");
+    } catch (err) {
+      showToast("Error de conexión", "error");
     }
-
-    alert("Puntaje registrado");
-    setSelectedTeam(null);
-    setScore("");
   };
 
   // --------------------------------------------------
@@ -86,12 +101,15 @@ export default function JudgeDashboard() {
   const generateBracket = async () => {
     const token = localStorage.getItem("judgeToken");
     if (!token) {
-      alert("No autorizado");
+      showToast("No autorizado", "error");
       return;
     }
 
     if (filteredCategory === "ALL") {
-      alert("Selecciona una categoría específica para generar el bracket.");
+      showToast(
+        "Selecciona una categoría específica para generar el bracket.",
+        "error"
+      );
       return;
     }
 
@@ -111,28 +129,41 @@ export default function JudgeDashboard() {
       const json = await r.json();
 
       if (!json.ok) {
-        alert(json.error || "Error generando bracket");
+        showToast(json.error || "Error generando bracket", "error");
         return;
       }
 
-      alert(`Bracket generado para ${filteredCategory}`);
+      showToast(`Bracket generado para ${filteredCategory}`);
       navigate("/finals");
     } catch (err) {
-      alert("Error de conexión");
+      showToast("Error de conexión", "error");
     }
   };
 
   return (
     <div style={styles.root}>
+      {/* ANIMACIÓN GLOBAL PARA EL TOAST */}
+    <style>{`
+      @keyframes fadeInScale {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+    `}</style>
       <div style={styles.container}>
         <h1 style={styles.title}>Panel de Jueces</h1>
 
         <button
-  onClick={() => navigate("/judge/prelims")}
-  style={styles.prelimsButton}
->
-  Preliminares
-</button>
+          onClick={() => navigate("/judge/prelims")}
+          style={styles.prelimsButton}
+        >
+          Preliminares
+        </button>
 
         {/* BOTÓN BRACKET (usa la categoría actual) */}
         <button onClick={generateBracket} style={styles.bracketButton}>
@@ -209,6 +240,20 @@ export default function JudgeDashboard() {
               Cancelar
             </button>
           </div>
+        </div>
+      )}
+
+      {/* TOAST */}
+      {toast && (
+        <div
+          style={{
+            ...styles.toast,
+            ...(toast.type === "error"
+              ? styles.toastError
+              : styles.toastSuccess),
+          }}
+        >
+          {toast.message}
         </div>
       )}
     </div>
@@ -389,17 +434,47 @@ const styles = {
   },
 
   prelimsButton: {
-  background: "linear-gradient(90deg, #4da6ff, #1a75ff)",
-  padding: "14px",
-  borderRadius: "14px",
-  border: "1px solid rgba(255,255,255,0.25)",
-  color: "white",
-  fontWeight: 700,
-  fontSize: "16px",
-  cursor: "pointer",
-  textAlign: "center",
-  letterSpacing: "0.05em",
-  boxShadow: "0 4px 15px rgba(0,80,255,0.25)",
-},
+    background: "linear-gradient(90deg, #4da6ff, #1a75ff)",
+    padding: "14px",
+    borderRadius: "14px",
+    border: "1px solid rgba(255,255,255,0.25)",
+    color: "white",
+    fontWeight: 700,
+    fontSize: "16px",
+    cursor: "pointer",
+    textAlign: "center",
+    letterSpacing: "0.05em",
+    boxShadow: "0 4px 15px rgba(0,80,255,0.25)",
+  },
+
+    toast: {
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    padding: "18px 24px",
+    borderRadius: "16px",
+    color: "white",
+    fontSize: "16px",
+    fontWeight: 700,
+    textAlign: "center",
+    backdropFilter: "blur(10px)",
+    boxShadow: "0 8px 30px rgba(0,0,0,0.5)",
+    zIndex: 99999,
+    minWidth: "220px",
+    maxWidth: "80vw",
+    opacity: 0.95,
+    animation: "fadeInScale .25s ease-out",
+  },
+
+  toastSuccess: {
+    background: "rgba(0, 200, 83, 0.85)",
+    border: "1px solid rgba(255,255,255,0.2)",
+  },
+
+  toastError: {
+    background: "rgba(200, 0, 0, 0.85)",
+    border: "1px solid rgba(255,255,255,0.2)",
+  },
 
 };
