@@ -6,19 +6,19 @@ export default function JudgeDashboard() {
   const navigate = useNavigate();
 
   const [teams, setTeams] = useState(fallbackTeams);
-  const [filteredCategory, setFilteredCategory] = useState("ALL");
+  const [filteredCategory, setFilteredCategory] = useState(fallbackTeams[0]?.category || "");
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [score, setScore] = useState("");
-  const [toast, setToast] = useState(null); // 👈 NUEVO
+  const [toast, setToast] = useState(null);
 
   // Categorías únicas
-  const categories = [
-    "ALL",
-    ...Array.from(new Set(fallbackTeams.map((t) => t.category))),
-  ];
+  const categories = Array.from(
+  new Set(fallbackTeams.map((t) => t.category))
+);
+
 
   // --------------------------------------------------
-  // TOAST LINDO (SIN ALERT BLOCKING)
+  // TOAST
   // --------------------------------------------------
   const showToast = (message, type = "success") => {
     setToast({ message, type });
@@ -28,7 +28,7 @@ export default function JudgeDashboard() {
   };
 
   // --------------------------------------------------
-  // BLOQUEO DE RUTA SIN TOKEN
+  // AUTH BLOCK
   // --------------------------------------------------
   useEffect(() => {
     const token = localStorage.getItem("judgeToken");
@@ -39,15 +39,14 @@ export default function JudgeDashboard() {
   }, [navigate]);
 
   // --------------------------------------------------
-  // FILTRAR EQUIPOS
+  // FILTER TEAMS
   // --------------------------------------------------
-  const filteredTeams =
-    filteredCategory === "ALL"
-      ? teams
-      : teams.filter((t) => t.category === filteredCategory);
+  const filteredTeams = teams.filter(
+  (t) => t.category === filteredCategory);
+
 
   // --------------------------------------------------
-  // ABRIR MODAL
+  // OPEN MODAL
   // --------------------------------------------------
   const openModal = (team) => {
     setSelectedTeam(team);
@@ -55,7 +54,7 @@ export default function JudgeDashboard() {
   };
 
   // --------------------------------------------------
-  // ENVIAR SCORE
+  // SUBMIT SCORE
   // --------------------------------------------------
   const submitScore = async () => {
     if (!selectedTeam || !score) {
@@ -96,7 +95,7 @@ export default function JudgeDashboard() {
   };
 
   // --------------------------------------------------
-  // GENERAR BRACKET (POR CATEGORÍA ACTUAL)
+  // GENERATE BRACKET
   // --------------------------------------------------
   const generateBracket = async () => {
     const token = localStorage.getItem("judgeToken");
@@ -105,14 +104,7 @@ export default function JudgeDashboard() {
       return;
     }
 
-    if (filteredCategory === "ALL") {
-      showToast(
-        "Selecciona una categoría específica para generar el bracket.",
-        "error"
-      );
-      return;
-    }
-
+    
     try {
       const r = await fetch(
         "https://roborave.onrender.com/api/bracket/generate",
@@ -133,7 +125,7 @@ export default function JudgeDashboard() {
         return;
       }
 
-      showToast(`Bracket generado para ${filteredCategory}`);
+      showToast(`Bracket generado para ${formatCategory(filteredCategory)}`);
       navigate("/finals");
     } catch (err) {
       showToast("Error de conexión", "error");
@@ -142,19 +134,20 @@ export default function JudgeDashboard() {
 
   return (
     <div style={styles.root}>
-      {/* ANIMACIÓN GLOBAL PARA EL TOAST */}
-    <style>{`
-      @keyframes fadeInScale {
-        from {
-          opacity: 0;
-          transform: translate(-50%, -50%) scale(0.9);
+      {/* ANIMACIÓN GLOBAL */}
+      <style>{`
+        @keyframes fadeInScale {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+          }
         }
-        to {
-          opacity: 1;
-          transform: translate(-50%, -50%) scale(1);
-        }
-      }
-    `}</style>
+      `}</style>
+
       <div style={styles.container}>
         <h1 style={styles.title}>Panel de Jueces</h1>
 
@@ -165,12 +158,11 @@ export default function JudgeDashboard() {
           Preliminares
         </button>
 
-        {/* BOTÓN BRACKET (usa la categoría actual) */}
         <button onClick={generateBracket} style={styles.bracketButton}>
           Generar Bracket de Finales
         </button>
 
-        {/* FILTRO DE CATEGORÍAS */}
+        {/* CATEGORÍAS */}
         <div style={styles.filterWrapper}>
           <div style={styles.fadeLeft} />
           <div style={styles.filterBar}>
@@ -190,7 +182,7 @@ export default function JudgeDashboard() {
                       : "1px solid rgba(255,255,255,0.16)",
                 }}
               >
-                {cat}{" "}
+                {cat === "ALL" ? "Todas las categorías" : formatCategory(cat)}{" "}
                 {cat !== "ALL" &&
                   `(${teams.filter((t) => t.category === cat).length})`}
               </div>
@@ -199,7 +191,7 @@ export default function JudgeDashboard() {
           <div style={styles.fadeRight} />
         </div>
 
-        {/* GRID PREMIUM */}
+        {/* GRID */}
         <div style={styles.grid}>
           {filteredTeams.map((team) => (
             <div
@@ -209,13 +201,15 @@ export default function JudgeDashboard() {
               style={styles.teamCard}
             >
               <div style={styles.teamName}>{team.name}</div>
-              <div style={styles.category}>{team.category}</div>
+              <div style={styles.category}>
+                {formatCategory(team.category)}
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* MODAL PREMIUM */}
+      {/* MODAL DE SCORE */}
       {selectedTeam && (
         <div style={styles.modalBackdrop}>
           <div style={styles.modal}>
@@ -261,8 +255,49 @@ export default function JudgeDashboard() {
 }
 
 /* -------------------------------------------------- */
+/* --------- FORMAT CATEGORY (MAPA COMPLETO) -------- */
+/* -------------------------------------------------- */
+
+function formatCategory(cat) {
+  const map = {
+    "A-MAZE-ING_ES": "a-MAZE-ing • ES",
+    "A-MAZE-ING_MS": "a-MAZE-ing • MS",
+
+    "SUMO_ES": "SumoBot Lego • ES",
+    "SUMO_MS": "SumoBot Lego • MS",
+
+    "SUMO1K_ES": "SumoBot 1 Kg • ES",
+    "SUMO1K_MS": "SumoBot 1 Kg • MS",
+    "SUMO1K_HS": "SumoBot 1 Kg • HS",
+    "SUMO1K_UP": "SumoBot 1 Kg • UP",
+
+    "SUMO_OPEN": "SumoBot • OPEN",
+
+    "FIRE_HS": "Fire Fighting • HS",
+
+    "SUMO3K_HS": "SumoBot 3 Kg • HS",
+    "SUMO3K_UP": "SumoBot 3 Kg • UP",
+
+    "SOCCER_ES": "Soccer Futbol • ES",
+    "SOCCER_MS": "Soccer Futbol • MS",
+    "SOCCER_HS": "Soccer Futbol • HS",
+
+    "FAST_MS": "Fastbot • MS",
+    "FAST_HS": "Fastbot • HS",
+    "FAST_UP": "Fastbot • UP",
+
+    "LINE_HS": "Line Following • HS",
+
+    "ENTRE_HS": "Entrepreneurial • HS",
+  };
+
+  return map[cat] || cat;
+}
+
+/* -------------------------------------------------- */
 /* ------------------- ESTILOS ---------------------- */
 /* -------------------------------------------------- */
+
 
 const styles = {
   root: {

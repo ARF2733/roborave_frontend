@@ -7,40 +7,41 @@ export default function Judge() {
   const [loading, setLoading] = useState(false);
 
   const loginJudge = async () => {
-    if (!pin) {
-      alert("Ingresa tu PIN");
+  if (!pin) {
+    alert("Ingresa tu PIN");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const r = await fetch("https://roborave.onrender.com/api/judge/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin }),
+    });
+
+    const json = await r.json();
+
+    if (!json.ok) {
+      setLoading(false);
+      alert("PIN incorrecto");
       return;
     }
 
-    setLoading(true);
+    // Guardar token
+    localStorage.setItem("judgeToken", json.token);
 
-    try {
-      const r = await fetch("https://roborave.onrender.com/api/judge/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin }),
-      });
+    // Ir a la selección de disciplina
+    navigate("/judge/select");
 
-      const json = await r.json();
+  } catch (err) {
+    alert("Error de conexión");
+  }
 
-      if (!json.ok) {
-        setLoading(false);
-        alert("PIN incorrecto");
-        return;
-      }
+  setLoading(false);
+};
 
-      // Guardar token
-      localStorage.setItem("judgeToken", json.token);
-
-      // Ir al panel
-      navigate("/judge/dashboard");
-
-    } catch (err) {
-      alert("Error de conexión");
-    }
-
-    setLoading(false);
-  };
 
   return (
     <div style={styles.root}>
