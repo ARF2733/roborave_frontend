@@ -16,7 +16,7 @@ export default function LiveHeatsGrid({ teams, qualified }) {
           >
             {/* ICONO CLASIFICADO / NO CLASIFICADO */}
             <span style={styles.statusIcon}>
-              {isQualified ? "✅" : "❌"}
+              {isQualified ? "✅" : ""}
             </span>
 
 
