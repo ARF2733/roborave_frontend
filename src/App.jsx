@@ -11,7 +11,7 @@ import JudgeAmazePrelims from "./JudgeAmazePrelims";
 import JudgeAmazeFinals from "./JudgeAmazeFinals";
 import JudgeSumoDashboard from "./JudgeSumoDashboard";
 import JudgeSumoPrelims from "./JudgeSumoPrelims";
-/*import JudgeSumoFinals from "./JudgeSumoFinals";*/
+import JudgeSumoFinals from "./JudgeSumoFinals";
 
 
 
@@ -50,7 +50,8 @@ export default function App() {
         <Route path="/judge/amaze/finals" element={<JudgeAmazeFinals />} />
         <Route path="/judge/sumobot" element={<JudgeSumoDashboard />} />
         <Route path="/judge/sumo/prelims" element={<JudgeSumoPrelims />} />
-        
+        <Route path="/judge/sumo/finals" element={<JudgeSumoFinals />} />
+
         {/* ROBO RAVE TV */}
         <Route path="/tv" element={<RoboRaveTV />} />
 
