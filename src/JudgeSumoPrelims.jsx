@@ -1,45 +1,100 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { fallbackTeams } from "./fallbackTeams";
 
-export default function JudgePrelims() {
+export default function JudgeSumoPrelims() {
   const [rounds, setRounds] = useState([]); // 3 rondas generadas
+  const [serverScores, setServerScores] = useState([]); // <- puntajes reales
+  const token = localStorage.getItem("judgeToken");
 
   /* ---------------------------------------------------
-     GENERAR 3 RONDAS ALEATORIAS
+        LEER SCORES REALES DEL BACKEND
   --------------------------------------------------- */
-  function generateRounds() {
-  // 1) Filtrar solo equipos de SUMO
-  const sumoTeams = fallbackTeams.filter(t => t.category === "SUMO_ES");
-
-  // 2) Mezclar aleatoriamente
-  const shuffled = [...sumoTeams].sort(() => Math.random() - 0.5);
-
-  // 3) Emparejar de 2 en 2
-  const pairs = [];
-  for (let i = 0; i < shuffled.length; i += 2) {
-    if (shuffled[i + 1]) {
-      pairs.push({
-        a: shuffled[i],
-        b: shuffled[i + 1],
-        winner: null,
-      });
+  async function loadScores() {
+    try {
+      const r = await fetch("https://roborave.onrender.com/api/scores");
+      const json = await r.json();
+      setServerScores(json.teams || []);
+    } catch (e) {
+      console.log("No se pudieron cargar scores");
     }
   }
 
-  // 4) Guardar las 3 rondas
-  setRounds([
-    [...pairs],
-    [...pairs],
-    [...pairs],
-   ]);
-  }
-
+  useEffect(() => {
+    loadScores();
+  }, []);
 
   /* ---------------------------------------------------
-     ACTUALIZAR GANADOR (reactivo)
+        OBTENER PUNTAJE TOTAL DEL SERVIDOR
+  --------------------------------------------------- */
+  function getTotal(team) {
+    const found = serverScores.find((t) => t.teamId === team.id);
+    if (!found || !found.heats) return 0;
+
+    return Object.values(found.heats).reduce(
+      (sum, h) => sum + (h.points || 0),
+      0
+    );
+  }
+
+  /* ---------------------------------------------------
+        REGISTRAR GANADOR (cada heat vale 3 puntos)
+  --------------------------------------------------- */
+  async function registerWin(team, heat) {
+    try {
+      const r = await fetch("https://roborave.onrender.com/api/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify({
+          teamId: team.id,
+          category: team.category,
+          heat,
+          score: { points: 3 },
+        }),
+      });
+
+      const json = await r.json();
+      if (!json.ok) {
+        console.log("Error registrando puntuación");
+        return;
+      }
+
+      await loadScores(); // ← ¡Actualiza los totales inmediatamente!
+    } catch (err) {
+      console.log("Error de conexión");
+    }
+  }
+
+  /* ---------------------------------------------------
+        GENERAR 3 RONDAS ALEATORIAS
+  --------------------------------------------------- */
+  function generateRounds() {
+    const sumoTeams = fallbackTeams.filter((t) => t.category === "SUMO_ES");
+    const shuffled = [...sumoTeams].sort(() => Math.random() - 0.5);
+
+    const pairs = [];
+    for (let i = 0; i < shuffled.length; i += 2) {
+      if (shuffled[i + 1]) {
+        pairs.push({
+          a: shuffled[i],
+          b: shuffled[i + 1],
+          winner: null,
+        });
+      }
+    }
+
+    setRounds([[...pairs], [...pairs], [...pairs]]);
+  }
+
+  /* ---------------------------------------------------
+        ACTUALIZAR GANADOR EN UI Y REGISTRAR PUNTOS
   --------------------------------------------------- */
   function setWinner(roundIdx, matchIdx, winnerId) {
-    setRounds(prev =>
+    const heat = roundIdx + 1; // heat 1, 2 o 3
+
+    setRounds((prev) =>
       prev.map((rnd, r) =>
         r === roundIdx
           ? rnd.map((m, mi) =>
@@ -48,14 +103,20 @@ export default function JudgePrelims() {
           : rnd
       )
     );
+
+    const match = rounds[roundIdx][matchIdx];
+    const winnerTeam =
+      match.a.id === winnerId ? match.a : match.b;
+
+    registerWin(winnerTeam, heat);
   }
 
   return (
     <div style={styles.root}>
-      <h1 style={styles.title}>Preliminares — SumoBot</h1>
+      <h1 style={styles.title}>SumoBot</h1>
 
       <button style={styles.button} onClick={generateRounds}>
-        Generar 3 Rondas Aleatorias
+        Random
       </button>
 
       {/* Mostrar rondas */}
@@ -66,24 +127,18 @@ export default function JudgePrelims() {
             number={idx + 1}
             matches={round}
             roundIndex={idx}
+            getTotal={getTotal}
             onSelectWinner={setWinner}
           />
         ))}
-
-      {/* Botón final */}
-      {rounds.length > 0 && (
-        <button style={styles.finalButton}>
-          Finalizar Preliminares y Ordenar Finalistas
-        </button>
-      )}
     </div>
   );
 }
 
 /* ---------------------------------------------------
-   RONDA
+      COMPONENTE RONDA
 --------------------------------------------------- */
-function RoundCard({ number, matches, roundIndex, onSelectWinner }) {
+function RoundCard({ number, matches, roundIndex, getTotal, onSelectWinner }) {
   return (
     <div style={styles.roundBlock}>
       <h2 style={styles.roundTitle}>Ronda {number}</h2>
@@ -95,6 +150,7 @@ function RoundCard({ number, matches, roundIndex, onSelectWinner }) {
             match={m}
             matchIndex={i}
             roundIndex={roundIndex}
+            getTotal={getTotal}
             onSelectWinner={onSelectWinner}
           />
         ))}
@@ -104,15 +160,16 @@ function RoundCard({ number, matches, roundIndex, onSelectWinner }) {
 }
 
 /* ---------------------------------------------------
-   MATCH
+      COMPONENTE MATCH
 --------------------------------------------------- */
-function MatchCard({ match, matchIndex, roundIndex, onSelectWinner }) {
+function MatchCard({ match, matchIndex, roundIndex, getTotal, onSelectWinner }) {
   const { a, b, winner } = match;
 
   return (
     <div style={styles.matchCard}>
       <TeamCard
         team={a}
+        total={getTotal(a)}
         active={winner === a.id}
         onClick={() => onSelectWinner(roundIndex, matchIndex, a.id)}
       />
@@ -121,6 +178,7 @@ function MatchCard({ match, matchIndex, roundIndex, onSelectWinner }) {
 
       <TeamCard
         team={b}
+        total={getTotal(b)}
         active={winner === b.id}
         onClick={() => onSelectWinner(roundIndex, matchIndex, b.id)}
       />
@@ -129,9 +187,9 @@ function MatchCard({ match, matchIndex, roundIndex, onSelectWinner }) {
 }
 
 /* ---------------------------------------------------
-   TEAM CARD
+      COMPONENTE TEAM CARD
 --------------------------------------------------- */
-function TeamCard({ team, active, onClick }) {
+function TeamCard({ team, total, active, onClick }) {
   return (
     <div
       onClick={onClick}
@@ -142,12 +200,13 @@ function TeamCard({ team, active, onClick }) {
     >
       <img src={`/logos/${team.logo}`} style={styles.logo} />
       <div style={styles.teamName}>{team.name}</div>
+      <div style={styles.points}>Total: {total}</div>
     </div>
   );
 }
 
 /* ---------------------------------------------------
-   ESTILOS
+      ESTILOS
 --------------------------------------------------- */
 
 const styles = {
@@ -155,7 +214,6 @@ const styles = {
     padding: "40px",
     textAlign: "center",
     color: "white",
-    fontFamily: "system-ui",
   },
 
   title: {
@@ -173,18 +231,6 @@ const styles = {
     color: "white",
     cursor: "pointer",
     marginBottom: "30px",
-  },
-
-  finalButton: {
-    padding: "14px 26px",
-    fontSize: "18px",
-    borderRadius: "14px",
-    background: "linear-gradient(90deg, #ff0084, #ff6600)",
-    color: "white",
-    border: "none",
-    cursor: "pointer",
-    marginTop: "40px",
-    fontWeight: 800,
   },
 
   roundBlock: {
@@ -221,11 +267,12 @@ const styles = {
   },
 
   teamCard: {
-    width: "120px",
+    width: "140px",
     padding: "10px",
     borderRadius: "14px",
     cursor: "pointer",
     transition: "all 0.2s ease",
+    textAlign: "center",
   },
 
   teamActive: {
@@ -235,7 +282,7 @@ const styles = {
   },
 
   teamInactive: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
 
   logo: {
@@ -249,5 +296,11 @@ const styles = {
   teamName: {
     fontSize: "14px",
     fontWeight: 700,
+    marginBottom: "6px",
+  },
+
+  points: {
+    fontSize: "13px",
+    opacity: 0.9,
   },
 };

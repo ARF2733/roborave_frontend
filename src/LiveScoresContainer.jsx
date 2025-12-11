@@ -11,12 +11,16 @@ export default function LiveScoresContainer() {
         const r = await fetch("https://roborave.onrender.com/api/scores");
         const json = await r.json();
 
-        // backend solo tiene equipos puntuados
         const scored = json.teams;
 
-        // combinar fallback + scores reales
         const merged = fallbackTeams.map(f => {
           const match = scored.find(s => s.teamId === f.id);
+
+          // <-- SUMAR TODOS LOS HEATS
+          const totalPoints = Object.values(match?.heats || {}).reduce(
+            (sum, h) => sum + (h.points || 0),
+            0
+          );
 
           return {
             id: f.id,
@@ -25,10 +29,9 @@ export default function LiveScoresContainer() {
             flag: f.flag,
             category: f.category,
 
-            // score real → si existe
-            score: match?.heats?.["1"]?.points || 0,
+            // <-- ahora muestra el total correcto
+            score: totalPoints,
 
-            // heats reales
             heats: match?.heats || {}
           };
         });
@@ -40,10 +43,7 @@ export default function LiveScoresContainer() {
       }
     };
 
-
     load();
-  
-    
     const interval = setInterval(load, 2000);
     return () => clearInterval(interval);
   }, []);

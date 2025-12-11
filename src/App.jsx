@@ -8,9 +8,12 @@ import Judge from "./Judge";
 import JudgeSelect from "./JudgeSelect";
 import JudgeAmazeDashboard from "./JudgeAmazeDashboard";
 import JudgeAmazePrelims from "./JudgeAmazePrelims";
+import JudgeAmazeFinals from "./JudgeAmazeFinals";
 import JudgeSumoDashboard from "./JudgeSumoDashboard";
-import JudgeDashboard from "./JudgeDashboard";
-import JudgePrelims from "./JudgePrelims";
+import JudgeSumoPrelims from "./JudgeSumoPrelims";
+/*import JudgeSumoFinals from "./JudgeSumoFinals";*/
+
+
 
 import RoboRaveTV from "./RoboRaveTV";
 import Finals from "./Finals";
@@ -44,21 +47,10 @@ export default function App() {
         <Route path="/judge/select" element={<JudgeSelect />} />
         <Route path="/judge/amaze" element={<JudgeAmazeDashboard />} />
         <Route path="/judge/amaze/prelims" element={<JudgeAmazePrelims />} />
+        <Route path="/judge/amaze/finals" element={<JudgeAmazeFinals />} />
         <Route path="/judge/sumobot" element={<JudgeSumoDashboard />} />
-
-
-        {/* DASHBOARD GENÉRICO (se irá eliminando pronto) */}
-        <Route path="/judge/dashboard" element={<JudgeDashboard />} />
-
-        {/* PRELIMS TEMPORAL (Sumo/Amaze se separarán) */}
-        <Route path="/judge/prelims" element={<JudgePrelims />} />
-
-        {/* FUTURAS RUTAS (no existen aún, pero quedan preparadas) */}
-        {/* <Route path="/judge/amaze/prelims" element={<AmazePrelims />} /> */}
-        {/* <Route path="/judge/amaze/finals" element={<AmazeFinals />} /> */}
-        {/* <Route path="/judge/sumobot/prelims" element={<SumoPrelims />} /> */}
-        {/* <Route path="/judge/sumobot/finals" element={<SumoFinals />} /> */}
-
+        <Route path="/judge/sumo/prelims" element={<JudgeSumoPrelims />} />
+        
         {/* ROBO RAVE TV */}
         <Route path="/tv" element={<RoboRaveTV />} />
 
