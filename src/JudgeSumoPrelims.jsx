@@ -92,24 +92,27 @@ export default function JudgeSumoPrelims() {
         ACTUALIZAR GANADOR EN UI Y REGISTRAR PUNTOS
   --------------------------------------------------- */
   function setWinner(roundIdx, matchIdx, winnerId) {
-    const heat = roundIdx + 1; // heat 1, 2 o 3
+  const heat = roundIdx + 1;
 
-    setRounds((prev) =>
-      prev.map((rnd, r) =>
-        r === roundIdx
-          ? rnd.map((m, mi) =>
-              mi === matchIdx ? { ...m, winner: winnerId } : m
-            )
-          : rnd
-      )
-    );
+  // ✔️ OBTENER EL MATCH ANTES DEL UPDATE
+  const match = rounds[roundIdx][matchIdx];
+  const winnerTeam = match.a.id === winnerId ? match.a : match.b;
 
-    const match = rounds[roundIdx][matchIdx];
-    const winnerTeam =
-      match.a.id === winnerId ? match.a : match.b;
+  // ✔️ ACTUALIZAR UI
+  setRounds((prev) =>
+    prev.map((rnd, r) =>
+      r === roundIdx
+        ? rnd.map((m, mi) =>
+            mi === matchIdx ? { ...m, winner: winnerId } : m
+          )
+        : rnd
+    )
+  );
 
-    registerWin(winnerTeam, heat);
-  }
+  // ✔️ REGISTRAR EN EL BACKEND
+  registerWin(winnerTeam, heat);
+}
+
 
   return (
     <div style={styles.root}>
